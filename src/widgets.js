@@ -1,169 +1,268 @@
 // -----------------------------------------------------------------------------
-// Dashboard widgets (SDK v0.14+, Gladys 5.1+).
+// Dashboard widget (manifest `widgets`, Gladys 5.1+): `doors`.
 //
-// A widget puts the integration's own data on the Gladys dashboard without a
-// dedicated core widget. The manifest `widgets` field declares its identity
-// (key, label, icon, optional per-instance `settings`); at runtime the
-// integration returns a DECLARATIVE content — `text`, `value`, `gauge`,
-// `status`, `chart`, `card-list`, `image`, `button` — that the core renders
-// with its own theme, dark mode and translations. No HTML, no CSS.
+// The use case: a glance at the wall tablet before leaving — are the doors
+// locked and closed, did the children come home (last accesses). For one
+// door, a direct "Always locked" button (safe), and "Normal schedule" when a
+// temporary rule is in force (ending "always locked" only with the remote
+// unlock enabled, see src/hub.js). No unlock button, ever.
 //
-// Each entry of WIDGETS is keyed by the widget `key` and exposes:
-//   - get(gladys, { settings, language, units, config }): the content,
-//     registered by index.js with `gladys.onWidgetGet(key, ...)`;
-//   - action(gladys, { actionKey, params, settings, config }) (optional): a
-//     tapped `button` carrying an `action`, registered with
-//     `gladys.onWidgetAction`.
-//
-// Check your contents in the tests with `validateWidgetContent` (exported by
-// the SDK, see test/widgets.test.js), or run with DEBUG=gladys-integration-sdk
-// to have the SDK log every violation of the vocabulary and the budget.
+// Budget (8 components, 1 focal, 1 status, 4 buttons): one status list (one
+// row per door, 10 at most), one card list (the last accesses), two buttons
+// at most. The rows are values, not device-bound tiles: the widget works
+// before the doors are added to Gladys.
 // -----------------------------------------------------------------------------
 
+import { WIDGET_COLORS } from '@gladysassistant/integration-sdk';
+import { ALARMS, LOCK, METHODS, POSITION, RULES, alarmKind } from './access/model.js';
+import { doorIds } from './devices.js';
+import { WIDGET_KEY } from './hub.js';
 import {
-  createLogger,
-  DEVICE_FEATURE_CATEGORIES,
-  DEVICE_TRANSPORTS,
-  WIDGET_COLORS,
-} from '@gladysassistant/integration-sdk';
-import { identifyDevice } from './devices/index.js';
-import { weatherStation } from './devices/weatherStation.js';
-import { plug } from './devices/plug.js';
-import { light } from './devices/light.js';
+  ACCESS_TEXT,
+  ALARM_TEXT,
+  CONNECTION_TEXT,
+  DIRECTION_TEXT,
+  ERROR_TEXT,
+  METHOD_TEXT,
+  pick,
+  ruleText,
+} from './texts.js';
 
-const logger = createLogger({ name: 'widgets' });
+// Action keys of the buttons: permanent once published (unique, the core
+// drops a button whose key is taken).
+export const ACTIONS = Object.freeze({
+  KEEP_LOCKED: 'keep_locked',
+  END_RULE: 'end_rule',
+});
 
-// Widget key, as declared in the manifest `widgets` field.
-export const DEMO_STATUS_WIDGET = 'demo_status';
+const MAX_ROWS = 10;
+const MAX_ACCESSES = 6;
+// In dark mode the `primary` style does not show (Gladys#3153): the active
+// choice is told by its icon.
+const ACTIVE_ICON = 'check-circle';
 
-// Keys of the `button` actions the demo_status content declares.
-const DEMO_STATUS_ACTIONS = { IDENTIFY_LIGHT: 'identify_light' };
-
-// How the plug transport reads in the status list.
-const TRANSPORT_STATUS = {
-  [DEVICE_TRANSPORTS.LOCAL]: { value: { en: 'Local', fr: 'Locale' }, color: WIDGET_COLORS.SUCCESS },
-  [DEVICE_TRANSPORTS.CLOUD]: { value: { en: 'Cloud', fr: 'Cloud' }, color: WIDGET_COLORS.INFO },
-  [DEVICE_TRANSPORTS.UNREACHABLE]: {
-    value: { en: 'Unreachable', fr: 'Injoignable' },
-    color: WIDGET_COLORS.DANGER,
+export const TEXT = {
+  noDoor: {
+    en: 'No door found in UniFi Access yet.',
+    fr: "Aucune porte trouvée dans UniFi Access pour l'instant.",
+    de: 'Noch keine Tür in UniFi Access gefunden.',
+    es: 'Todavía no se ha encontrado ninguna puerta en UniFi Access.',
+  },
+  unknown: {
+    en: 'This door is no longer in UniFi Access: choose another one in the widget settings.',
+    fr: "Cette porte n'est plus dans UniFi Access : choisissez-en une autre dans les réglages du widget.",
+    de: 'Diese Tür ist nicht mehr in UniFi Access: Wähle eine andere in den Widget-Einstellungen.',
+    es: 'Esta puerta ya no está en UniFi Access: elija otra en la configuración del widget.',
+  },
+  noAccess: {
+    en: 'No access recorded since the integration started.',
+    fr: "Aucun accès enregistré depuis le démarrage de l'intégration.",
+    de: 'Seit dem Start der Integration wurde kein Zutritt erfasst.',
+    es: 'Ningún acceso registrado desde el inicio de la integración.',
+  },
+  locked: { en: 'Locked', fr: 'Verrouillée', de: 'Verriegelt', es: 'Bloqueada' },
+  unlocked: { en: 'Unlocked', fr: 'Déverrouillée', de: 'Entriegelt', es: 'Desbloqueada' },
+  open: { en: 'open', fr: 'ouverte', de: 'offen', es: 'abierta' },
+  closed: { en: 'closed', fr: 'fermée', de: 'geschlossen', es: 'cerrada' },
+  offline: { en: 'Offline', fr: 'Hors ligne', de: 'Offline', es: 'Sin conexión' },
+  waiting: { en: 'Waiting…', fr: 'En attente…', de: 'Warte…', es: 'Esperando…' },
+  keepLocked: {
+    en: 'Always locked',
+    fr: 'Toujours verrouiller',
+    de: 'Immer verriegeln',
+    es: 'Siempre bloquear',
+  },
+  endRule: {
+    en: 'Normal schedule',
+    fr: 'Planning normal',
+    de: 'Normaler Plan',
+    es: 'Horario normal',
   },
 };
 
-// A live tile references a feature by its external_id: read it from the
-// discovery payload itself, so the widget and the device never disagree.
-function featureExternalId(gladys, config, blueprint, category) {
-  const device = blueprint.buildDevice(gladys, config);
-  return device.features.find((feature) => feature.category === category).external_id;
+// Toasts after a tap (≤ 200 characters).
+export const DONE_TEXT = {
+  en: {
+    keepLocked: (door) => `${door} stays locked until "Normal schedule".`,
+    endRule: (door) => `${door} follows its normal schedule again.`,
+  },
+  fr: {
+    keepLocked: (door) => `${door} reste verrouillée jusqu'à « Planning normal ».`,
+    endRule: (door) => `${door} suit de nouveau son planning normal.`,
+  },
+  de: {
+    keepLocked: (door) => `${door} bleibt verriegelt bis „Normaler Plan“.`,
+    endRule: (door) => `${door} folgt wieder ihrem normalen Plan.`,
+  },
+  es: {
+    keepLocked: (door) => `${door} permanece bloqueada hasta «Horario normal».`,
+    endRule: (door) => `${door} vuelve a seguir su horario normal.`,
+  },
+};
+
+const fit = (text, max) => (text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text);
+
+function message(text, language) {
+  return {
+    ttl_seconds: 60,
+    components: [{ type: 'text', variant: 'body', text: pick(text, language) }],
+  };
 }
 
-function plugConnectionStatus(gladys, config) {
-  const { transport, degraded } = plug.transport(gladys, config);
-  const { value, color } = TRANSPORT_STATUS[transport];
-  if (degraded) {
+/** One status row: the door and what matters most about it. */
+function doorRow(hub, door, language) {
+  const t = (text) => pick(text, language);
+  if (door.online === false || hub.reachable === false) {
     return {
-      value: { en: `${value.en} (degraded mode)`, fr: `${value.fr} (mode dégradé)` },
-      color: WIDGET_COLORS.WARNING,
+      label: fit(door.name, 40),
+      value: t(TEXT.offline),
+      color: WIDGET_COLORS.NEUTRAL,
+      icon: 'wifi-off',
     };
   }
-  return { value, color };
+  if (door.alarms.length > 0) {
+    const kind = alarmKind(door.alarms[0]);
+    return {
+      label: fit(door.name, 40),
+      value: fit(t(ALARM_TEXT[kind] ?? ALARM_TEXT[ALARMS.OTHER]), 40),
+      color: WIDGET_COLORS.DANGER,
+      icon: 'alert-triangle',
+    };
+  }
+  const parts = [];
+  if (door.lock === LOCK.LOCKED) {
+    parts.push(t(TEXT.locked));
+  } else if (door.lock === LOCK.UNLOCKED) {
+    parts.push(t(TEXT.unlocked));
+  }
+  if (door.position === POSITION.OPEN) {
+    parts.push(t(TEXT.open));
+  } else if (door.position === POSITION.CLOSED) {
+    parts.push(t(TEXT.closed));
+  }
+  const secure = door.lock === LOCK.LOCKED && door.position !== POSITION.OPEN;
+  return {
+    label: fit(door.name, 40),
+    value: fit(parts.join(' · ') || t(TEXT.waiting), 40),
+    color: secure ? WIDGET_COLORS.SUCCESS : WIDGET_COLORS.WARNING,
+    icon: door.lock === LOCK.UNLOCKED ? 'unlock' : 'lock',
+  };
+}
+
+function accessItem(access, showDoor, language) {
+  const t = (text) => pick(text, language);
+  const details = [
+    ...(showDoor && access.doorName ? [access.doorName] : []),
+    t(METHOD_TEXT[access.method] ?? METHOD_TEXT[METHODS.OTHER]),
+    ...(DIRECTION_TEXT[access.direction] ? [t(DIRECTION_TEXT[access.direction])] : []),
+  ];
+  return {
+    title: fit(access.user || t(ACCESS_TEXT.unknownUser), 60),
+    subtitle: details.join(' · '),
+    date: new Date(access.at).toISOString(),
+    badge: access.granted
+      ? { text: fit(t(ACCESS_TEXT.granted), 16), color: WIDGET_COLORS.SUCCESS }
+      : { text: fit(t(ACCESS_TEXT.denied), 16), color: WIDGET_COLORS.DANGER },
+  };
+}
+
+function buttons(hub, door, language) {
+  const t = (text) => pick(text, language);
+  const params = { door: doorIds(hub.gladys, door.id).device };
+  const keepLock = door.rule?.type === RULES.KEEP_LOCK;
+  const list = [
+    {
+      type: 'button',
+      label: t(TEXT.keepLocked),
+      icon: keepLock ? ACTIVE_ICON : 'lock',
+      style: 'secondary',
+      action: { key: ACTIONS.KEEP_LOCKED, params, confirm: true },
+    },
+  ];
+  const temporary = door.rule && door.rule.type !== RULES.NORMAL;
+  if (temporary && (!keepLock || hub.config.allowRemoteUnlock)) {
+    list.push({
+      type: 'button',
+      label: t(TEXT.endRule),
+      icon: 'calendar',
+      style: 'secondary',
+      action: { key: ACTIONS.END_RULE, params, confirm: true },
+    });
+  }
+  return list;
+}
+
+/** The widget content for the chosen door (or every door). */
+export function doorsContent(hub, { settings = {}, language = 'en' } = {}) {
+  const lang = ['en', 'fr', 'de', 'es'].includes(language) ? language : 'en';
+  if (!hub.config?.host || !hub.config?.token) {
+    return message(CONNECTION_TEXT.noHost, lang);
+  }
+  if (hub.error && hub.doors.size === 0) {
+    return message(ERROR_TEXT[hub.error.kind], lang);
+  }
+  let doors = [...hub.doors.values()];
+  if (settings.door) {
+    const door = hub.doorOfDevice(settings.door);
+    if (!door) {
+      return message(TEXT.unknown, lang);
+    }
+    doors = [door];
+  }
+  if (doors.length === 0) {
+    return message(TEXT.noDoor, lang);
+  }
+  const ids = new Set(doors.map((door) => door.id));
+  const accesses = hub.history
+    .filter((access) => !settings.door || ids.has(access.doorId))
+    .slice(0, MAX_ACCESSES);
+
+  const components = [
+    {
+      type: 'status',
+      items: doors.slice(0, MAX_ROWS).map((door) => doorRow(hub, door, lang)),
+    },
+  ];
+  if (doors.length === 1 && doors[0].rule && doors[0].rule.type !== RULES.NORMAL) {
+    components.push({
+      type: 'text',
+      variant: 'caption',
+      text: fit(ruleText(doors[0].rule, lang), 80),
+    });
+  }
+  if (accesses.length > 0) {
+    components.push({
+      type: 'card-list',
+      display: 'list',
+      items: accesses.map((access) => accessItem(access, doors.length > 1, lang)),
+    });
+  } else {
+    components.push({ type: 'text', variant: 'caption', text: pick(TEXT.noAccess, lang) });
+  }
+  if (doors.length === 1 && hub.reachable && doors[0].ruleSupported) {
+    components.push(...buttons(hub, doors[0], lang));
+  }
+  return { ttl_seconds: 60, components };
 }
 
 export const WIDGETS = {
-  [DEMO_STATUS_WIDGET]: {
-    // `settings` holds the per-instance values of the declared `settings`
-    // (none here); `language` and `units` are those of the user viewing the
-    // dashboard, for the values you format yourself. Multi-language objects
-    // (`{ en, fr }`) are picked by the core, like everywhere else.
-    async get(gladys, { config }) {
-      logger.debug(`onWidgetGet <- ${DEMO_STATUS_WIDGET}`);
-      return {
-        // Reload policy: the computed parts below only change with the
-        // config, and index.js nudges the widget on every (re)connection and
-        // config update (see refreshWidgets) — the TTL is just a safety net.
-        ttl_seconds: 300,
-        components: [
-          // Device-bound tiles: LIVE, they follow the published states over
-          // the core's real-time path. No TTL, no nudge involved.
-          {
-            type: 'value',
-            label: { en: 'Temperature', fr: 'Température' },
-            icon: 'thermometer',
-            device_feature: featureExternalId(
-              gladys,
-              config,
-              weatherStation,
-              DEVICE_FEATURE_CATEGORIES.TEMPERATURE_SENSOR,
-            ),
-          },
-          {
-            type: 'value',
-            label: { en: 'Office plug', fr: 'Prise du bureau' },
-            icon: 'zap',
-            device_feature: featureExternalId(
-              gladys,
-              config,
-              plug,
-              DEVICE_FEATURE_CATEGORIES.ENERGY_SENSOR,
-            ),
-          },
-          // Computed rows: what the integration knows that no device feature
-          // carries. Served from the core cache until the TTL or a nudge.
-          {
-            type: 'status',
-            items: [
-              {
-                label: { en: 'Plug connection', fr: 'Connexion de la prise' },
-                icon: 'wifi',
-                ...plugConnectionStatus(gladys, config),
-              },
-              {
-                label: { en: 'Observed location', fr: 'Position observée' },
-                icon: 'map-pin',
-                value: `${config.latitude.toFixed(2)}, ${config.longitude.toFixed(2)}`,
-                color: WIDGET_COLORS.NEUTRAL,
-              },
-            ],
-          },
-          // `params` are declared HERE and sent back as-is: the handler never
-          // receives user input (a dashboard can hang on a public wall).
-          {
-            type: 'button',
-            label: { en: 'Identify the light', fr: 'Identifier la lampe' },
-            icon: 'eye',
-            style: 'secondary',
-            action: {
-              key: DEMO_STATUS_ACTIONS.IDENTIFY_LIGHT,
-              params: { device: light.deviceExternalId(gladys) },
-            },
-          },
-        ],
-      };
-    },
+  [WIDGET_KEY]: {
+    get: (hub, request) => doorsContent(hub, request),
 
-    // Resolve an optional toast (string or multi-language object, ≤ 200
-    // characters). After a successful action the core drops the cached
-    // content and every open dashboard refetches it: no nudge needed.
-    async action(gladys, { actionKey, params, config }) {
-      logger.info(`onWidgetAction <- ${DEMO_STATUS_WIDGET}.${actionKey}`);
-      if (actionKey === DEMO_STATUS_ACTIONS.IDENTIFY_LIGHT) {
-        return identifyDevice(gladys, params.device, config);
+    // The toast is multi-language: Gladys shows the user's language.
+    async action(hub, { actionKey, params = {}, settings = {} }) {
+      const target = params.door || settings.door;
+      const toast = (key, door) =>
+        Object.fromEntries(
+          Object.entries(DONE_TEXT).map(([lang, texts]) => [lang, fit(texts[key](door.name), 200)]),
+        );
+      if (actionKey === ACTIONS.KEEP_LOCKED) {
+        return toast('keepLocked', await hub.keepLocked(target, 'widget'));
       }
-      // Throwing acks the action as failed: the message reaches the user.
-      throw new Error(`Unknown widget action: ${actionKey}`);
+      if (actionKey === ACTIONS.END_RULE) {
+        return toast('endRule', await hub.endRule(target, 'widget'));
+      }
+      throw new Error(`Unknown widget action ${actionKey}`);
     },
   },
 };
-
-/**
- * Freshness nudge: ask the core to re-pull every widget NOW instead of
- * waiting for the content TTL. Call it when you KNOW a computed content
- * changed (here: the config, which drives the plug transport and the observed
- * location) — and after every (re)connection, since the nudges are
- * fire-and-forget: rate-limited core-side to 1 per 10 s per widget, dropped
- * silently while disconnected.
- */
-export function refreshWidgets(gladys) {
-  for (const key of Object.keys(WIDGETS)) {
-    gladys.requestWidgetRefresh(key);
-  }
-}

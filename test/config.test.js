@@ -1,33 +1,64 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeConfig, DEFAULT_CONFIG } from '../src/config.js';
+import { DEFAULT_CONFIG, describeHost, normalizeConfig, parseHost } from '../src/config.js';
 
-test('normalizeConfig returns the defaults when called with no argument', () => {
-  assert.deepEqual(normalizeConfig(), DEFAULT_CONFIG);
+test('the console address accepts an IP, a name, a port or a URL from the browser', () => {
+  assert.deepEqual(parseHost('192.0.2.1'), { hostname: '192.0.2.1', port: 12445 });
+  assert.deepEqual(parseHost(' 192.0.2.1:8443 '), { hostname: '192.0.2.1', port: 8443 });
+  assert.deepEqual(parseHost('unifi.local'), { hostname: 'unifi.local', port: 12445 });
+  // The web interface URL (443) does not serve the developer API: its port.
+  assert.deepEqual(parseHost('https://192.0.2.1/access/dashboard'), {
+    hostname: '192.0.2.1',
+    port: 12445,
+  });
+  assert.deepEqual(parseHost('https://192.0.2.1:12445'), { hostname: '192.0.2.1', port: 12445 });
+  assert.deepEqual(parseHost('[2001:db8::1]'), { hostname: '2001:db8::1', port: 12445 });
 });
 
-test('normalizeConfig keeps user values over the defaults', () => {
-  const config = normalizeConfig({ latitude: 45.5, longitude: -73.6, unit: 'fahrenheit' });
-  assert.equal(config.latitude, 45.5);
-  assert.equal(config.longitude, -73.6);
-  assert.equal(config.unit, 'fahrenheit');
+test('an unusable address is refused, and so are credentials in it', () => {
+  for (const raw of [
+    '',
+    '   ',
+    null,
+    42,
+    'ftp://192.0.2.1',
+    'http://',
+    'https://admin:pw@192.0.2.1',
+  ]) {
+    assert.equal(parseHost(raw), null, String(raw));
+  }
 });
 
-test('normalizeConfig coerces numeric strings coming from a form', () => {
-  const config = normalizeConfig({ latitude: '48.8', longitude: '2.3', poll_frequency: '600' });
-  assert.equal(config.latitude, 48.8);
-  assert.equal(config.longitude, 2.3);
-  assert.equal(config.poll_frequency, 600);
-  assert.equal(typeof config.poll_frequency, 'number');
+test('describeHost shows host:port', () => {
+  assert.equal(describeHost({ hostname: '192.0.2.1', port: 12445 }), '192.0.2.1:12445');
+  assert.equal(describeHost(parseHost('[2001:db8::1]:8443')), '[2001:db8::1]:8443');
 });
 
-test('normalizeConfig falls back to the default for a missing numeric field', () => {
-  const config = normalizeConfig({ unit: 'celsius' });
-  assert.equal(config.poll_frequency, DEFAULT_CONFIG.poll_frequency);
+test('the defaults are safe: no self-signed certificate, no remote unlock, French names', () => {
+  const config = normalizeConfig(DEFAULT_CONFIG);
+  assert.equal(config.host, null);
+  assert.equal(config.hostTyped, false);
+  assert.equal(config.token, '');
+  assert.equal(config.allowSelfSigned, false);
+  assert.equal(config.allowRemoteUnlock, false);
+  assert.equal(config.language, 'fr');
+  assert.deepEqual(normalizeConfig(undefined), config);
 });
 
-test('GLADYS_PREFER_LOCAL defaults to true and only an explicit false disables it', () => {
-  assert.equal(normalizeConfig().GLADYS_PREFER_LOCAL, true);
-  assert.equal(normalizeConfig({ GLADYS_PREFER_LOCAL: true }).GLADYS_PREFER_LOCAL, true);
-  assert.equal(normalizeConfig({ GLADYS_PREFER_LOCAL: false }).GLADYS_PREFER_LOCAL, false);
+test('the configuration is normalized', () => {
+  const config = normalizeConfig({
+    host: 'nope://',
+    api_token: '  token  ',
+    allow_self_signed: 'true',
+    allow_remote_unlock: true,
+    language: 'de',
+  });
+  assert.equal(config.host, null);
+  assert.equal(config.hostTyped, true);
+  assert.equal(config.token, 'token');
+  assert.equal(config.allowSelfSigned, true);
+  assert.equal(config.allowRemoteUnlock, true);
+  assert.equal(config.language, 'de');
+  assert.equal(normalizeConfig({ language: 'it' }).language, 'fr');
+  assert.equal(normalizeConfig({ allow_remote_unlock: 'yes' }).allowRemoteUnlock, false);
 });

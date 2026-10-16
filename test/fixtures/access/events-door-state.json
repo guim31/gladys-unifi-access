@@ -1,0 +1,658 @@
+[
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000005a",
+    "save_to_history": false,
+    "data": {
+      "name": "Hub Door Mini garage",
+      "alias": "Garage hub",
+      "id": "aabbcc000004",
+      "ip": "192.0.2.17",
+      "mac": "aa:bb:cc:00:00:04",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-Hub-Door-Mini",
+      "connected_hub_id": "",
+      "location_id": "00000000-0000-0000-0000-00000000000e",
+      "firmware": "v1.5.16.0",
+      "version": "",
+      "guid": "00000000-0000-0000-0000-00000000000f",
+      "start_time": 1786742713,
+      "hw_type": "GA",
+      "revision": "1786742728627098717",
+      "cap": null,
+      "location_states": [
+        {
+          "location_id": "00000000-0000-0000-0000-00000000000e",
+          "lock": "locked",
+          "dps": "close",
+          "dps_connected": true,
+          "emergency": {
+            "software": "none",
+            "hardware": "none"
+          },
+          "is_unavailable": false
+        }
+      ],
+      "category": ["hub"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["location_states"],
+      "all_field": false,
+      "id": "aabbcc000004",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000005b",
+    "save_to_history": false,
+    "data": {
+      "name": "Hub Door Mini garage",
+      "alias": "Garage hub",
+      "id": "aabbcc000004",
+      "ip": "192.0.2.17",
+      "mac": "aa:bb:cc:00:00:04",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-Hub-Door-Mini",
+      "connected_hub_id": "",
+      "location_id": "00000000-0000-0000-0000-00000000000e",
+      "firmware": "v1.5.16.0",
+      "version": "",
+      "guid": "00000000-0000-0000-0000-00000000000f",
+      "start_time": 1786742713,
+      "hw_type": "GA",
+      "revision": "1786743792142371938",
+      "cap": null,
+      "location_states": [
+        {
+          "location_id": "00000000-0000-0000-0000-00000000000e",
+          "lock": "locked",
+          "dps": "open",
+          "dps_connected": true,
+          "alarms": [
+            {
+              "type": "force_unlock"
+            }
+          ],
+          "emergency": {
+            "software": "none",
+            "hardware": "none"
+          },
+          "is_unavailable": false
+        }
+      ],
+      "category": ["hub"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["location_states"],
+      "all_field": false,
+      "id": "aabbcc000004",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.location.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000005c",
+    "save_to_history": false,
+    "data": {
+      "id": "00000000-0000-0000-0000-00000000000e",
+      "location_type": "door",
+      "name": "Garage",
+      "up_id": "00000000-0000-0000-0000-000000000001",
+      "extras": null,
+      "device_ids": ["aabbcc000004"],
+      "state": {
+        "lock": "locked",
+        "dps": "open",
+        "dps_connected": true,
+        "alarms": [
+          {
+            "type": "force_unlock"
+          }
+        ],
+        "emergency": {
+          "software": "none",
+          "hardware": "none"
+        },
+        "is_unavailable": false
+      },
+      "thumbnail": {
+        "type": "none",
+        "url": "",
+        "door_thumbnail_last_update": 0
+      },
+      "last_activity": 1786743734
+    },
+    "meta": {
+      "object_type": "location",
+      "target_field": null,
+      "all_field": true,
+      "id": "00000000-0000-0000-0000-00000000000e",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.device.update",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000004",
+    "save_to_history": false,
+    "data": {
+      "unique_id": "aabbcc000004",
+      "name": "Hub Door Mini garage",
+      "alias": "Garage hub",
+      "device_type": "UA-Hub-Door-Mini",
+      "connected_uah_id": "",
+      "location_id": "00000000-0000-0000-0000-00000000000e",
+      "firmware": "v1.5.16.0",
+      "version": "",
+      "ip": "192.0.2.17",
+      "mac": "aa:bb:cc:00:00:04",
+      "hw_type": "GA",
+      "start_time": 1786742713,
+      "last_seen": 1764008026,
+      "security_check": true,
+      "source": "",
+      "bom_rev": "",
+      "guid": "00000000-0000-0000-0000-00000000000f",
+      "need_advisory": false,
+      "is_camera": false,
+      "is_adopted": true,
+      "is_managed": true,
+      "is_connected": true,
+      "is_online": true,
+      "is_rebooting": false,
+      "is_unavailable": false,
+      "is_upgrade_blocked": false,
+      "is_export_sf_blocked": false,
+      "adopting": false,
+      "location": {
+        "unique_id": "00000000-0000-0000-0000-00000000000e",
+        "name": "Garage",
+        "up_id": "00000000-0000-0000-0000-000000000001",
+        "timezone": "",
+        "location_type": "door",
+        "extra_type": "",
+        "full_name": "Home / Garage",
+        "level": 0,
+        "work_time": "[]",
+        "work_time_id": "",
+        "extras": {},
+        "previous_name": null
+      },
+      "door": {
+        "unique_id": "00000000-0000-0000-0000-00000000000e",
+        "name": "Garage",
+        "up_id": "00000000-0000-0000-0000-000000000001",
+        "timezone": "",
+        "location_type": "door",
+        "extra_type": "",
+        "full_name": "Home / Garage",
+        "level": 0,
+        "work_time": "[]",
+        "work_time_id": "",
+        "extras": {},
+        "previous_name": null
+      },
+      "floor": {
+        "unique_id": "00000000-0000-0000-0000-000000000001",
+        "name": "Ground floor",
+        "up_id": "00000000-0000-0000-0000-000000000000",
+        "timezone": "",
+        "location_type": "floor",
+        "extra_type": "",
+        "full_name": "Test Name 3",
+        "level": 1,
+        "work_time": "[]",
+        "work_time_id": "",
+        "extras": {},
+        "previous_name": null
+      },
+      "configs": [
+        {
+          "device_id": "aabbcc000004",
+          "key": "alias",
+          "value": "Garage hub",
+          "tag": "device_extra",
+          "update_time": "2025-06-14T11:36:56-05:00",
+          "create_time": "2025-05-26T09:45:39-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_d1_ma",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2025-08-08T22:55:26-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_d1_mw",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2025-08-08T22:55:26-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_d1_ocp",
+          "value": "false",
+          "tag": "hub_power",
+          "update_time": "2025-08-08T22:55:26-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_poe_p1_mw",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2025-08-08T22:55:26-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_budget_mw",
+          "value": "22000",
+          "tag": "hub_power",
+          "update_time": "2025-08-08T22:55:26-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_total_used_12v_mw",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2025-08-08T22:55:26-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "ssh_user",
+          "value": "Test username 8",
+          "tag": "credential",
+          "update_time": "2025-05-26T14:45:39-05:00",
+          "create_time": "2025-05-26T09:45:39-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "cert_fingerprint",
+          "value": "0000000000000000000000000000000000000005",
+          "tag": "credential",
+          "update_time": "2025-05-26T14:45:39-05:00",
+          "create_time": "2025-05-26T09:45:39-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "nacl_public_key",
+          "value": "REDACTED-0000000e-xxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "tag": "credential",
+          "update_time": "2025-05-26T14:45:40-05:00",
+          "create_time": "2025-05-26T09:45:40-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "poe-type",
+          "value": "802.3at",
+          "tag": "device_extra",
+          "update_time": "2025-05-26T14:45:42-05:00",
+          "create_time": "2025-05-26T09:45:42-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-power-sw",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-05-26T14:48:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-button-neg",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-05-26T14:48:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-lock-nc",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-05-26T14:48:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-lock-com",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-05-26T14:48:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-lock-no",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-05-26T14:48:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_poe-p0",
+          "value": "on",
+          "tag": "wiring_state",
+          "update_time": "2025-05-26T14:48:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "input_d1_button",
+          "value": "off",
+          "tag": "hub_action",
+          "update_time": "2025-05-26T16:03:54-05:00",
+          "create_time": "2025-05-26T11:03:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "output_d1_lock_relay",
+          "value": "off",
+          "tag": "hub_action",
+          "update_time": "2025-05-26T16:03:54-05:00",
+          "create_time": "2025-05-26T11:03:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "input_d1_dps",
+          "value": "on",
+          "tag": "hub_action",
+          "update_time": "2025-05-26T21:13:54-05:00",
+          "create_time": "2025-05-26T11:03:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_poe-p1",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-07-04T22:37:54-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "ssh_password",
+          "value": "REDACTED-0000000f-xx",
+          "tag": "credential",
+          "update_time": "2025-11-01T05:00:06-05:00",
+          "create_time": "2025-05-26T09:45:39-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-button-pos",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2025-06-15T21:19:02-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_d1_mv",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2025-11-07T14:05:03-06:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_bitmap",
+          "value": "2496",
+          "tag": "wiring_state",
+          "update_time": "2026-08-14T16:41:25-05:00",
+          "create_time": "2025-05-26T09:45:42-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_free_budget_mw",
+          "value": "22000",
+          "tag": "hub_power",
+          "update_time": "2026-08-14T16:21:36-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_poe-p2",
+          "value": "off",
+          "tag": "wiring_state",
+          "update_time": "2026-08-14T16:21:36-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_poe_p2_mw",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2026-08-14T16:21:36-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-dps-neg",
+          "value": "on",
+          "tag": "wiring_state",
+          "update_time": "2026-08-14T16:41:36-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "wiring_state_d1-dps-pos",
+          "value": "on",
+          "tag": "wiring_state",
+          "update_time": "2026-08-14T16:41:36-05:00",
+          "create_time": "2025-05-26T09:48:54-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "power_total_used_poe_mw",
+          "value": "0",
+          "tag": "hub_power",
+          "update_time": "2026-08-14T16:21:36-05:00",
+          "create_time": "2025-08-08T17:55:26-05:00"
+        },
+        {
+          "device_id": "aabbcc000004",
+          "key": "nacl_private_key",
+          "value": "REDACTED-0000002a-xxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "tag": "credential",
+          "update_time": "2026-08-14T16:25:28-05:00",
+          "create_time": "2026-08-14T16:25:28-05:00"
+        }
+      ],
+      "update": null,
+      "update_manual": {
+        "device_version_upgrade_status": {
+          "completed": false,
+          "is_waiting": false,
+          "is_preparing": false,
+          "is_upgrading": false,
+          "upgrade_seconds": 0,
+          "timed_out": false,
+          "failed": false,
+          "failure_reason": "",
+          "is_downloading": false
+        },
+        "device_type": "",
+        "from_version": "",
+        "last_upgrade_start_time": null,
+        "last_upgrade_success": null,
+        "last_upgrade_failure_reason": "",
+        "last_download_start_time": null,
+        "last_download_success": null,
+        "last_download_failure_reason": "",
+        "downloaded": false
+      },
+      "capabilities": [
+        "ssh_change",
+        "support_ui_account",
+        "is_hub",
+        "identity_is_hub",
+        "incremental_update_setting",
+        "pin_code",
+        "support_reboot",
+        "first_person_in",
+        "unlock_schedule",
+        "mobile_unlock_ver2",
+        "dps_trigger_level",
+        "unlock_time_period_v2",
+        "report_viewer_id",
+        "nfc_card_easy_provision",
+        "two_factor_auth",
+        "power_state",
+        "double_badge",
+        "unlock_suspend",
+        "any_auth_type",
+        "location_state"
+      ],
+      "resource_name": "Test Name 26",
+      "display_model": "UA Hub Door Mini",
+      "revision": "1786742728627098717",
+      "revision_update_time": 1786742736,
+      "version_update_time": -62135596800,
+      "firmware_update_time": -62135596800,
+      "adopt_time": 1748270739,
+      "extensions": [
+        {
+          "unique_id": "00000000-0000-0000-0000-000000000010",
+          "device_id": "aabbcc000004",
+          "extension_name": "port_setting",
+          "source_id": "port1",
+          "target_type": "door",
+          "target_value": "00000000-0000-0000-0000-00000000000e",
+          "target_name": "Garage",
+          "target_config": [
+            {
+              "config_tag": "device_setting",
+              "config_key": "lock_unlock_time",
+              "config_value": 5
+            },
+            {
+              "config_tag": "device_setting",
+              "config_key": "button_reverse",
+              "config_value": false
+            },
+            {
+              "config_tag": "device_setting",
+              "config_key": "is_relay_nc",
+              "config_value": false
+            },
+            {
+              "config_tag": "device_setting",
+              "config_key": "dps_reverse",
+              "config_value": false
+            }
+          ]
+        }
+      ],
+      "model": "UA Hub Door Mini",
+      "images": {
+        "xs": "https://host-1.test.local/fingerprint/ui/icons/00000000-0000-0000-0000-00000000006c_25x25.png",
+        "s": "https://host-1.test.local/fingerprint/ui/icons/00000000-0000-0000-0000-00000000006c_32x32.png",
+        "m": "https://host-1.test.local/fingerprint/ui/icons/00000000-0000-0000-0000-00000000006c_51x51.png",
+        "l": "https://host-1.test.local/fingerprint/ui/icons/00000000-0000-0000-0000-00000000006c_64x64.png",
+        "xl": "https://host-1.test.local/fingerprint/ui/icons/00000000-0000-0000-0000-00000000006c_101x101.png",
+        "xxl": "https://host-1.test.local/fingerprint/ui/icons/00000000-0000-0000-0000-00000000006c_128x128.png",
+        "base": "icons/00000000-0000-0000-0000-00000000006c_257x257.png"
+      },
+      "provision_time": "0",
+      "provision_percent": "0",
+      "template": null
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000005d",
+    "save_to_history": false,
+    "data": {
+      "name": "Hub Door Mini garage",
+      "alias": "Garage hub",
+      "id": "aabbcc000004",
+      "ip": "192.0.2.17",
+      "mac": "aa:bb:cc:00:00:04",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-Hub-Door-Mini",
+      "connected_hub_id": "",
+      "location_id": "00000000-0000-0000-0000-00000000000e",
+      "firmware": "v1.5.16.0",
+      "version": "",
+      "guid": "00000000-0000-0000-0000-00000000000f",
+      "start_time": 1786742712,
+      "hw_type": "GA",
+      "revision": "1786743792142371938",
+      "cap": null,
+      "location_states": [
+        {
+          "location_id": "00000000-0000-0000-0000-00000000000e",
+          "lock": "unlocked",
+          "dps": "open",
+          "dps_connected": true,
+          "emergency": {
+            "software": "none",
+            "hardware": "none"
+          },
+          "is_unavailable": false
+        }
+      ],
+      "category": ["hub"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["location_states"],
+      "all_field": false,
+      "id": "aabbcc000004",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.location.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000005e",
+    "save_to_history": false,
+    "data": {
+      "id": "00000000-0000-0000-0000-00000000000e",
+      "location_type": "door",
+      "name": "Garage",
+      "up_id": "00000000-0000-0000-0000-000000000001",
+      "extras": null,
+      "device_ids": ["aabbcc000004"],
+      "state": {
+        "lock": "unlocked",
+        "dps": "open",
+        "dps_connected": true,
+        "emergency": {
+          "software": "none",
+          "hardware": "none"
+        },
+        "is_unavailable": false
+      },
+      "thumbnail": {
+        "type": "none",
+        "url": "",
+        "door_thumbnail_last_update": 0
+      },
+      "last_activity": 1786743856
+    },
+    "meta": {
+      "object_type": "location",
+      "target_field": null,
+      "all_field": true,
+      "id": "00000000-0000-0000-0000-00000000000e",
+      "source": ""
+    }
+  }
+]

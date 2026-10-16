@@ -1,0 +1,74 @@
+[
+  {
+    "event": "access.data.device.remote_unlock",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "unique_id": "00000000-0000-0000-0000-00000000004c",
+      "name": "Front door",
+      "up_id": "00000000-0000-0000-0000-00000000004d",
+      "timezone": "",
+      "location_type": "door",
+      "extra_type": "",
+      "full_name": "Home / Front door",
+      "level": 0,
+      "work_time": "[]",
+      "work_time_id": "",
+      "extras": {
+        "door_thumbnail": "REDACTED-00000026-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "door_thumbnail_last_update": 1709785759,
+        "uah-input_state_dps": "off",
+        "uah-wiring_state_dps-neg": "off",
+        "uah-wiring_state_dps-pos": "off"
+      }
+    }
+  },
+  {
+    "event": "access.remote_view.change",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000004f",
+    "save_to_history": false,
+    "data": {
+      "reason_code": 108,
+      "remote_call_request_id": "req-0000000000000000000000000001"
+    }
+  },
+  {
+    "event": "access.remote_view.change",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000050",
+    "save_to_history": false,
+    "data": {
+      "reason_code": 108,
+      "remote_call_request_id": "req-0000000000000000000000000002"
+    }
+  },
+  {
+    "event": "access.remote_view",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000051",
+    "save_to_history": false,
+    "data": {
+      "channel": "00000000-0000-0000-0000-000000000052",
+      "token": "REDACTED-00000027-xxxxxxxxxxxxxxxxxx",
+      "device_id": "aabbcc000002",
+      "device_type": "UA-G2-PRO",
+      "device_name": "Reader front outside",
+      "door_name": "Front door",
+      "controller_id": "aabbcc000011",
+      "floor_name": "Ground floor",
+      "request_id": "req-0000000000000000000000000001",
+      "clear_request_id": "",
+      "in_or_out": "in",
+      "create_time": 1709785930,
+      "reason_code": 0,
+      "door_guard_ids": ["00000000-0000-0000-0000-000000000053"],
+      "connected_uah_id": "aabbcc000001",
+      "room_id": "WR-aabbcc000002-room",
+      "host_device_mac": "AABBCC000011",
+      "support_feature": ["doorbell_bind"],
+      "connected_uah_type": "UAH"
+    }
+  }
+]

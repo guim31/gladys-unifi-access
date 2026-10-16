@@ -1,0 +1,816 @@
+[
+  {
+    "event": "access.remote_view",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000054",
+    "save_to_history": false,
+    "data": {
+      "channel": "00000000-0000-0000-0000-000000000055",
+      "token": "REDACTED-00000028-xxxxxxxxxxxxxxxxxx",
+      "device_id": "aabbcc000002",
+      "device_type": "UA-G2-PRO",
+      "device_name": "Reader front outside",
+      "door_id": "00000000-0000-0000-0000-000000000006",
+      "door_name": "Front door",
+      "controller_id": "aabbcc000012",
+      "floor_name": "Ground floor",
+      "request_id": "req-0000000000000000000000000003",
+      "clear_request_id": "",
+      "in_or_out": "in",
+      "create_time": 1786729371,
+      "reason_code": 0,
+      "door_guard_ids": [
+        "00000000-0000-0000-0000-00000000000b",
+        "00000000-0000-0000-0000-00000000000c"
+      ],
+      "connected_uah_id": "aabbcc000001",
+      "room_id": "WR-aabbcc000002-room",
+      "host_device_mac": "AABBCC000013",
+      "console_id": "00000000000000000000000000000000000000000000000000000000000f:0000000000",
+      "support_feature": [
+        "doorbell_bind",
+        "doorbell_timeout",
+        "support_ems",
+        "identity_support_ems"
+      ],
+      "connected_uah_type": "UAH",
+      "is_double_driveway": false,
+      "hub_gate_door_mode": "",
+      "unlocking_not_allowed": false,
+      "doorbell_channel": "",
+      "disable_pickup": false,
+      "send_voip": true,
+      "mutable_content": true,
+      "template_id": "",
+      "is_camera": false,
+      "has_package_camera": false
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000056",
+    "save_to_history": false,
+    "data": {
+      "name": "UA Hub Front",
+      "alias": "Hub front door",
+      "id": "aabbcc000001",
+      "ip": "192.0.2.16",
+      "mac": "aa:bb:cc:00:00:01",
+      "online": true,
+      "adopting": false,
+      "device_type": "UAH",
+      "connected_hub_id": "",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v4.12.19.0",
+      "version": "v4.12.195",
+      "guid": "00000000-0000-0000-0000-000000000007",
+      "start_time": 1786727929,
+      "hw_type": "",
+      "revision": "1786725455291261345",
+      "cap": null,
+      "location_states": [
+        {
+          "location_id": "00000000-0000-0000-0000-000000000006",
+          "lock": "unlocked",
+          "dps": "none",
+          "dps_connected": false,
+          "unlock_suspend": {
+            "status": "end",
+            "unlock_type": ""
+          },
+          "emergency": {
+            "software": "none",
+            "hardware": "none"
+          },
+          "is_unavailable": false
+        }
+      ],
+      "category": ["hub"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["location_states"],
+      "all_field": false,
+      "id": "aabbcc000001",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.logs.insights.add",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "id": "",
+      "log_key": "dashboard.access.door.unlock.success",
+      "event_type": "access.door.unlock",
+      "message": "Access Granted (Hand)",
+      "published": 1786729410000,
+      "result": "ACCESS",
+      "metadata": {
+        "actor": {
+          "id": "",
+          "type": "user",
+          "display_name": "Alice Martin"
+        },
+        "authentication": {
+          "id": "",
+          "type": "authentication",
+          "display_name": "Hand wave",
+          "credential_provider": "wave"
+        },
+        "building": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "type": "building",
+          "display_name": "Home"
+        },
+        "device": [
+          {
+            "id": "aabbcc000001",
+            "type": "UAH",
+            "display_name": "UA Hub Front"
+          },
+          {
+            "id": "aabbcc000003",
+            "type": "UA-G2-MINI",
+            "display_name": "Reader front inside",
+            "alternate_id": "00000000-0000-0000-0000-00000000000d",
+            "alternate_name": "Reader"
+          }
+        ],
+        "device_config": {
+          "id": "door_entry_method",
+          "type": "device_config",
+          "display_name": "entry"
+        },
+        "device_ua_hub": {
+          "id": "aabbcc000001",
+          "type": "UAH",
+          "display_name": "UA Hub Front"
+        },
+        "device_ua_lite": {
+          "id": "aabbcc000003",
+          "type": "UA-G2-MINI",
+          "display_name": "Reader front inside",
+          "alternate_id": "00000000-0000-0000-0000-00000000000d",
+          "alternate_name": "Reader"
+        },
+        "device_ua_reader": {
+          "id": "aabbcc000003",
+          "type": "UA-G2-MINI",
+          "display_name": "Reader front inside",
+          "alternate_id": "00000000-0000-0000-0000-00000000000d",
+          "alternate_name": "Reader"
+        },
+        "door": {
+          "id": "aabbcc000001",
+          "type": "door",
+          "display_name": "Front door"
+        },
+        "fo": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "type": "floor",
+          "display_name": "Ground floor"
+        },
+        "opened_direction": {
+          "id": "door_entry_method",
+          "type": "device_config",
+          "display_name": "entry"
+        },
+        "opened_method": {
+          "id": "",
+          "type": "opened_method",
+          "display_name": "Hand wave"
+        },
+        "reason_code": {
+          "id": "0",
+          "type": "reason_code",
+          "display_name": ""
+        },
+        "three_button_method": {
+          "id": "",
+          "type": "three_button_method",
+          "display_name": ""
+        }
+      }
+    }
+  },
+  {
+    "event": "access.logs.add",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "_id": "",
+      "@timestamp": "",
+      "_source": {
+        "actor": {
+          "id": "",
+          "type": "user",
+          "display_name": "Alice Martin"
+        },
+        "event": {
+          "type": "access.door.unlock",
+          "display_message": "Access Granted (Hand)",
+          "result": "ACCESS",
+          "published": 1786729410000,
+          "log_key": "dashboard.access.door.unlock.success",
+          "log_category": "Unlocks",
+          "level": 0,
+          "event": ""
+        },
+        "authentication": {
+          "credential_provider": "WAVE"
+        },
+        "target": [
+          {
+            "type": "UAH",
+            "id": "aabbcc000001",
+            "display_name": "UA Hub Front"
+          },
+          {
+            "type": "device_config",
+            "id": "door_entry_method",
+            "display_name": "entry"
+          },
+          {
+            "type": "reason_code",
+            "id": "0",
+            "display_name": ""
+          },
+          {
+            "type": "three_button_method",
+            "id": "",
+            "display_name": ""
+          },
+          {
+            "type": "UA-G2-MINI",
+            "id": "aabbcc000003",
+            "display_name": "Reader front inside",
+            "alternate_id": "00000000-0000-0000-0000-00000000000d",
+            "alternate_name": "Reader"
+          },
+          {
+            "type": "door",
+            "id": "aabbcc000001",
+            "display_name": "Front door"
+          },
+          {
+            "type": "floor",
+            "id": "00000000-0000-0000-0000-000000000001",
+            "display_name": "Ground floor"
+          },
+          {
+            "type": "building",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "display_name": "Home"
+          }
+        ]
+      },
+      "tag": "access"
+    }
+  },
+  {
+    "event": "access.remote_view.change",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000057",
+    "save_to_history": false,
+    "data": {
+      "reason_code": 105,
+      "remote_call_request_id": "req-0000000000000000000000000003"
+    }
+  },
+  {
+    "event": "access.data.top_log.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000058",
+    "save_to_history": false,
+    "data": {
+      "hits": [],
+      "buckets": null
+    }
+  },
+  {
+    "event": "access.logs.insights.add",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "id": "",
+      "log_key": "dashboard.access.door.unlock.failed",
+      "event_type": "access.door.unlock",
+      "message": "Access Denied / Unknown (NFC)",
+      "published": 1786729565000,
+      "result": "BLOCKED",
+      "metadata": {
+        "actor": {
+          "id": "",
+          "type": "user",
+          "display_name": "Alice Martin"
+        },
+        "authentication": {
+          "id": "f00dfeed",
+          "type": "authentication",
+          "display_name": "NFC",
+          "credential_provider": "nfc"
+        },
+        "building": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "type": "building",
+          "display_name": "Home"
+        },
+        "device": [
+          {
+            "id": "aabbcc000001",
+            "type": "UAH",
+            "display_name": "UA Hub Front"
+          },
+          {
+            "id": "aabbcc000002",
+            "type": "UA-G2-PRO",
+            "display_name": "Reader front outside",
+            "alternate_id": "00000000-0000-0000-0000-000000000009",
+            "alternate_name": "Reader"
+          }
+        ],
+        "device_config": {
+          "id": "door_entry_method",
+          "type": "device_config",
+          "display_name": "entry"
+        },
+        "device_ua_hub": {
+          "id": "aabbcc000001",
+          "type": "UAH",
+          "display_name": "UA Hub Front"
+        },
+        "device_ua_pro": {
+          "id": "aabbcc000002",
+          "type": "UA-G2-PRO",
+          "display_name": "Reader front outside",
+          "alternate_id": "00000000-0000-0000-0000-000000000009",
+          "alternate_name": "Reader"
+        },
+        "device_ua_reader": {
+          "id": "aabbcc000002",
+          "type": "UA-G2-PRO",
+          "display_name": "Reader front outside",
+          "alternate_id": "00000000-0000-0000-0000-000000000009",
+          "alternate_name": "Reader"
+        },
+        "door": {
+          "id": "aabbcc000001",
+          "type": "door",
+          "display_name": "Front door"
+        },
+        "fo": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "type": "floor",
+          "display_name": "Ground floor"
+        },
+        "nfc": {
+          "id": "0a0b0c0d",
+          "type": "NFC",
+          "display_name": "NFC card"
+        },
+        "nfc_id": {
+          "id": "0a0b0c0d",
+          "type": "nfc_id",
+          "display_name": "NFC card"
+        },
+        "opened_direction": {
+          "id": "door_entry_method",
+          "type": "device_config",
+          "display_name": "entry"
+        },
+        "opened_method": {
+          "id": "",
+          "type": "opened_method",
+          "display_name": "NFC"
+        },
+        "reason_code": {
+          "id": "101",
+          "type": "reason_code",
+          "display_name": ""
+        },
+        "three_button_method": {
+          "id": "",
+          "type": "three_button_method",
+          "display_name": ""
+        },
+        "unlock_source": {
+          "id": "l2",
+          "type": "unlock_source",
+          "display_name": "Reader"
+        }
+      }
+    }
+  },
+  {
+    "event": "access.logs.add",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "_id": "",
+      "@timestamp": "",
+      "_source": {
+        "actor": {
+          "id": "",
+          "type": "user",
+          "display_name": "Alice Martin"
+        },
+        "event": {
+          "type": "access.door.unlock",
+          "display_message": "Access Denied / Unknown (NFC)",
+          "result": "BLOCKED",
+          "published": 1786729565000,
+          "log_key": "dashboard.access.door.unlock.failed",
+          "log_category": "Access Denial",
+          "level": 0,
+          "event": ""
+        },
+        "authentication": {
+          "credential_provider": "NFC",
+          "issuer": "f00dfeed"
+        },
+        "target": [
+          {
+            "type": "UAH",
+            "id": "aabbcc000001",
+            "display_name": "UA Hub Front"
+          },
+          {
+            "type": "device_config",
+            "id": "door_entry_method",
+            "display_name": "entry"
+          },
+          {
+            "type": "reason_code",
+            "id": "101",
+            "display_name": ""
+          },
+          {
+            "type": "three_button_method",
+            "id": "",
+            "display_name": ""
+          },
+          {
+            "type": "UA-G2-PRO",
+            "id": "aabbcc000002",
+            "display_name": "Reader front outside",
+            "alternate_id": "00000000-0000-0000-0000-000000000009",
+            "alternate_name": "Reader"
+          },
+          {
+            "type": "door",
+            "id": "aabbcc000001",
+            "display_name": "Front door"
+          },
+          {
+            "type": "floor",
+            "id": "00000000-0000-0000-0000-000000000001",
+            "display_name": "Ground floor"
+          },
+          {
+            "type": "building",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "display_name": "Home"
+          },
+          {
+            "type": "nfc_id",
+            "id": "0a0b0c0d",
+            "display_name": "NFC card"
+          },
+          {
+            "type": "NFC",
+            "id": "0a0b0c0d",
+            "display_name": "NFC card"
+          },
+          {
+            "type": "unlock_source",
+            "id": "l2",
+            "display_name": "Reader"
+          }
+        ]
+      },
+      "tag": "access"
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000059",
+    "save_to_history": false,
+    "data": {
+      "name": "UA Hub Front",
+      "alias": "Hub front door",
+      "id": "aabbcc000001",
+      "ip": "192.0.2.16",
+      "mac": "aa:bb:cc:00:00:01",
+      "online": true,
+      "adopting": false,
+      "device_type": "UAH",
+      "connected_hub_id": "",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v4.12.19.0",
+      "version": "v4.12.195",
+      "guid": "00000000-0000-0000-0000-000000000007",
+      "start_time": 1786727929,
+      "hw_type": "",
+      "revision": "1786729544053878905",
+      "wire_state": {
+        "wiring_state_12v-neg": "off",
+        "wiring_state_12v-pos": "off",
+        "wiring_state_aux-dry-com": "off",
+        "wiring_state_aux-dry-nc": "off",
+        "wiring_state_aux-dry-no": "off",
+        "wiring_state_aux-wet-com": "off",
+        "wiring_state_aux-wet-nc": "off",
+        "wiring_state_aux-wet-no": "off",
+        "wiring_state_dps-neg": "off",
+        "wiring_state_dps-pos": "off",
+        "wiring_state_lock-dry-com": "off",
+        "wiring_state_lock-dry-nc": "off",
+        "wiring_state_lock-dry-no": "off",
+        "wiring_state_lock-wet-com": "off",
+        "wiring_state_lock-wet-nc": "off",
+        "wiring_state_lock-wet-no": "off",
+        "wiring_state_poe-p1-exit": "on",
+        "wiring_state_poe-p2-enter": "off",
+        "wiring_state_poe-p3-camera": "on",
+        "wiring_state_rel-neg": "off",
+        "wiring_state_rel-pos": "off",
+        "wiring_state_ren-neg": "off",
+        "wiring_state_ren-pos": "off",
+        "wiring_state_rex-neg": "off",
+        "wiring_state_rex-pos": "off"
+      },
+      "cap": [
+        "unlock_failure_limit",
+        "emergency_settings",
+        "user_access_control",
+        "visitor_access_control",
+        "schedule_v1",
+        "unlock_schedule",
+        "get_da_config_v2",
+        "incremental_update_user_token",
+        "pin_code",
+        "dps_alarm",
+        "input_mode_switch",
+        "aux_alarm",
+        "aux_delay_time",
+        "hold_time_0.1s",
+        "lock_relay_report",
+        "ssh_change",
+        "door_bell",
+        "multi_unlock_schedule",
+        "support_ui_account",
+        "aux_option_change",
+        "unlock_time_period",
+        "incremental_update_setting",
+        "mqtt_topic_update_setting",
+        "identity_mobile_unlock_v2",
+        "user_remote_unlock",
+        "two_factor_auth"
+      ],
+      "location_states": [
+        {
+          "location_id": "00000000-0000-0000-0000-000000000006",
+          "lock": "locked",
+          "dps": "none",
+          "dps_connected": false,
+          "unlock_suspend": {
+            "status": "end",
+            "unlock_type": ""
+          },
+          "emergency": {
+            "software": "none",
+            "hardware": "none"
+          },
+          "is_unavailable": false
+        }
+      ],
+      "settings": [
+        {
+          "key": "ren_button_mode",
+          "tag": "uah_config",
+          "value": "push"
+        },
+        {
+          "key": "input_ren_mode",
+          "tag": "uah_config",
+          "value": "no"
+        },
+        {
+          "key": "input_rex_mode",
+          "tag": "uah_config",
+          "value": "no"
+        },
+        {
+          "key": "dps_mode",
+          "tag": "uah_config",
+          "value": "no"
+        },
+        {
+          "key": "input_rel_mode",
+          "tag": "uah_config",
+          "value": "no"
+        }
+      ],
+      "category": ["hub"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": null,
+      "all_field": true,
+      "id": "aabbcc000001",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.device.remote_unlock",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "unique_id": "00000000-0000-0000-0000-000000000006",
+      "name": "Front door",
+      "up_id": "00000000-0000-0000-0000-000000000001",
+      "timezone": "",
+      "location_type": "door",
+      "extra_type": "",
+      "full_name": "Home / Front door",
+      "level": 0,
+      "work_time": "[]",
+      "work_time_id": "",
+      "extras": {
+        "door_thumbnail": "REDACTED-00000029-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "door_thumbnail_last_update": 1786729565,
+        "uah-input_state_dps": "off",
+        "uah-wiring_state_dps-neg": "off",
+        "uah-wiring_state_dps-pos": "off"
+      },
+      "previous_name": null
+    }
+  },
+  {
+    "event": "access.logs.insights.add",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "id": "",
+      "log_key": "dashboard.access.door.unlock.success",
+      "event_type": "access.door.unlock",
+      "message": "Access Granted (Remote)",
+      "published": 1786729619000,
+      "result": "ACCESS",
+      "metadata": {
+        "actor": {
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "type": "user",
+          "display_name": "Bob Durand",
+          "first_name": "Bob",
+          "last_name": "Durand"
+        },
+        "authentication": {
+          "id": "",
+          "type": "authentication",
+          "display_name": "Remote",
+          "credential_provider": "remote_through_uah"
+        },
+        "building": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "type": "building",
+          "display_name": "Home"
+        },
+        "device": {
+          "id": "aabbcc000001",
+          "type": "UAH",
+          "display_name": "UA Hub Front"
+        },
+        "device_config": {
+          "id": "door_entry_method",
+          "type": "device_config",
+          "display_name": "entry"
+        },
+        "device_ua_hub": {
+          "id": "aabbcc000001",
+          "type": "UAH",
+          "display_name": "UA Hub Front"
+        },
+        "door": {
+          "id": "aabbcc000001",
+          "type": "door",
+          "display_name": "Front door"
+        },
+        "fo": {
+          "id": "00000000-0000-0000-0000-000000000001",
+          "type": "floor",
+          "display_name": "Ground floor"
+        },
+        "opened_direction": {
+          "id": "door_entry_method",
+          "type": "device_config",
+          "display_name": "entry"
+        },
+        "opened_method": {
+          "id": "",
+          "type": "opened_method",
+          "display_name": "Remote"
+        },
+        "reason_code": {
+          "id": "0",
+          "type": "reason_code",
+          "display_name": ""
+        },
+        "three_button_method": {
+          "id": "",
+          "type": "three_button_method",
+          "display_name": ""
+        },
+        "user_status": {
+          "id": "",
+          "type": "user_status",
+          "display_name": "Active"
+        }
+      }
+    }
+  },
+  {
+    "event": "access.logs.add",
+    "receiver_id": "",
+    "event_object_id": "aabbcc000001",
+    "save_to_history": false,
+    "data": {
+      "_id": "",
+      "@timestamp": "",
+      "_source": {
+        "actor": {
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "type": "user",
+          "display_name": "Bob Durand",
+          "first_name": "Bob",
+          "last_name": "Durand"
+        },
+        "event": {
+          "type": "access.door.unlock",
+          "display_message": "Access Granted (Remote)",
+          "result": "ACCESS",
+          "published": 1786729619000,
+          "log_key": "dashboard.access.door.unlock.success",
+          "log_category": "Unlocks",
+          "level": 0,
+          "event": ""
+        },
+        "authentication": {
+          "credential_provider": "REMOTE_THROUGH_UAH"
+        },
+        "target": [
+          {
+            "type": "UAH",
+            "id": "aabbcc000001",
+            "display_name": "UA Hub Front"
+          },
+          {
+            "type": "device_config",
+            "id": "door_entry_method",
+            "display_name": "entry"
+          },
+          {
+            "type": "reason_code",
+            "id": "0",
+            "display_name": ""
+          },
+          {
+            "type": "three_button_method",
+            "id": "",
+            "display_name": ""
+          },
+          {
+            "type": "door",
+            "id": "aabbcc000001",
+            "display_name": "Front door"
+          },
+          {
+            "type": "floor",
+            "id": "00000000-0000-0000-0000-000000000001",
+            "display_name": "Ground floor"
+          },
+          {
+            "type": "building",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "display_name": "Home"
+          },
+          {
+            "type": "user_status",
+            "id": "",
+            "display_name": "Active"
+          }
+        ]
+      },
+      "tag": "access"
+    }
+  }
+]

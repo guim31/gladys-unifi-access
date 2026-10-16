@@ -1,0 +1,45 @@
+{
+  "code": "SUCCESS",
+  "msg": "success",
+  "data": [
+    {
+      "door_lock_relay_status": "lock",
+      "door_position_status": "open",
+      "extras": {},
+      "floor_id": "00000000-0000-0000-0000-000000000001",
+      "full_name": "Home / Garage",
+      "id": "00000000-0000-0000-0000-00000000000e",
+      "is_bind_hub": true,
+      "name": "Garage",
+      "type": "door"
+    },
+    {
+      "door_lock_relay_status": "lock",
+      "door_position_status": "open",
+      "extras": {},
+      "floor_id": "00000000-0000-0000-0000-000000000001",
+      "full_name": "Home / Back door",
+      "id": "00000000-0000-0000-0000-000000000002",
+      "is_bind_hub": true,
+      "name": "Back door",
+      "type": "door"
+    },
+    {
+      "door_lock_relay_status": "lock",
+      "door_position_status": "none",
+      "extras": {
+        "door_thumbnail": "REDACTED-0000002b-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "door_thumbnail_last_update": 1786822236,
+        "uah-input_state_dps": "off",
+        "uah-wiring_state_dps-neg": "off",
+        "uah-wiring_state_dps-pos": "off"
+      },
+      "floor_id": "00000000-0000-0000-0000-000000000001",
+      "full_name": "Home / Front door",
+      "id": "00000000-0000-0000-0000-000000000006",
+      "is_bind_hub": true,
+      "name": "Front door",
+      "type": "door"
+    }
+  ]
+}

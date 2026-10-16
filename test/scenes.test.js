@@ -1,93 +1,106 @@
+// -----------------------------------------------------------------------------
+// The scene actions, and the safety rule of the series: whatever unlocks a
+// door is disabled by default and never a switch nor a button. "Always
+// locked" is safe and always allowed; ending it may unlock the door, so it
+// is held to the same switch as the remote unlock.
+// -----------------------------------------------------------------------------
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { createFakeGladys } from '@gladysassistant/integration-sdk/testing';
-import { DEVICE_BLUEPRINTS } from '../src/devices/index.js';
-import { MOTION_DETECTED_TRIGGER, motionSensor } from '../src/devices/motionSensor.js';
-import { SCENE_ACTIONS } from '../src/scenes.js';
-import { normalizeConfig } from '../src/config.js';
+import { CONFIG, DOORS, createWorld } from './helpers/world.js';
 
-const manifest = JSON.parse(
-  await readFile(new URL('../gladys-assistant-integration.json', import.meta.url), 'utf8'),
-);
-const config = normalizeConfig();
+async function world(t, options) {
+  const w = await createWorld(options);
+  t.after(() => w.app.stop());
+  return w;
+}
 
-const declarationOf = (list, key) => manifest[list].find((entry) => entry.key === key);
-const keysOf = (list) => (list ?? []).map((entry) => entry.key);
-const deviceIdOf = (gladys, key) =>
-  DEVICE_BLUEPRINTS.find((bp) => bp.key === key).deviceExternalId(gladys);
+const unlockOn = { config: { ...CONFIG, allow_remote_unlock: true } };
+const sent = (w, method, suffix) =>
+  w.controller.requests.filter((r) => r.method === method && r.path.endsWith(suffix));
 
-// Let the async interval callback run to completion.
-const flush = () => new Promise((resolve) => setImmediate(resolve));
-
-test('the motion sensor fires one motion_detected event per detection, none on the clear', async (t) => {
-  t.mock.timers.enable({ apis: ['setInterval', 'setTimeout'] });
-  const gladys = createFakeGladys();
-  const stopPush = motionSensor.startPush(gladys, config);
-  try {
-    t.mock.timers.tick(60_000);
-    await flush();
-    assert.equal(gladys.fake.sceneEvents.length, 1, 'one detection, one event');
-    assert.equal(gladys.fake.sceneEvents[0].key, MOTION_DETECTED_TRIGGER);
-    assert.equal(gladys.fake.states.at(-1).state, 1, 'the state is still published');
-
-    t.mock.timers.tick(10_000);
-    await flush();
-    assert.equal(gladys.fake.states.at(-1).state, 0, 'the detection is cleared');
-    assert.equal(gladys.fake.sceneEvents.length, 1, 'the clear fires no event');
-  } finally {
-    stopPush();
-  }
+test('the remote unlock is refused by default, and nothing is sent', async (t) => {
+  const w = await world(t);
+  const ack = await w.fake.sceneAction('unlock_door', { door: w.deviceId(DOORS.FRONT) });
+  assert.equal(ack.success, false);
+  assert.match(ack.error, /Remote unlock is disabled/);
+  assert.equal(sent(w, 'PUT', '/unlock').length, 0);
+  assert.equal(w.controller.unlocks.length, 0);
 });
 
-test('motion_detected data only carries keys the trigger declares', async (t) => {
-  t.mock.timers.enable({ apis: ['setInterval', 'setTimeout'] });
-  const gladys = createFakeGladys();
-  const stopPush = motionSensor.startPush(gladys, config);
-  try {
-    t.mock.timers.tick(60_000);
-    await flush();
-  } finally {
-    stopPush();
+test('enabled, the remote unlock is sent once, signed Gladys', async (t) => {
+  const w = await world(t, unlockOn);
+  const ack = await w.fake.sceneAction('unlock_door', { door: w.deviceId(DOORS.FRONT) });
+  assert.deepEqual(ack, { success: true, data: { outputs: { door_name: 'Front door' } } });
+  assert.deepEqual(w.controller.unlocks, [
+    { id: DOORS.FRONT, body: { actor_id: 'gladys', actor_name: 'Gladys' } },
+  ]);
+});
+
+test('no device feature can unlock a door', async (t) => {
+  const w = await world(t, unlockOn);
+  for (const device of w.fake.discoveredDevices) {
+    for (const feature of device.features) {
+      assert.equal(feature.read_only, true, feature.external_id);
+      const ack = await w.fake.setValue(device, feature, 0);
+      assert.equal(ack.success, false, 'no command handler');
+    }
   }
-  const [{ data }] = gladys.fake.sceneEvents;
-  const trigger = declarationOf('scene_triggers', MOTION_DETECTED_TRIGGER);
-  // The core keeps the `fields` keys (filters) and the `variables` keys
-  // (exposed to the scene): any other key would be silently dropped.
-  const declared = [...keysOf(trigger.fields), ...keysOf(trigger.variables)];
-  for (const [key, value] of Object.entries(data)) {
-    assert.ok(declared.includes(key), `data.${key} is not declared, the core would drop it`);
-    assert.ok(value === null || typeof value !== 'object', `data.${key} must be a primitive`);
-  }
-  // A `"source": "devices"` filter stores a device external_id.
-  assert.equal(data.device, deviceIdOf(gladys, 'motion-sensor'));
-  const targets = trigger.fields.find((field) => field.key === 'target').options;
-  assert.ok(
-    targets.some((option) => option.value === data.target),
-    `data.target "${data.target}" must be one of the filter options`,
+  assert.equal(w.controller.unlocks.length, 0);
+});
+
+test('"Keep a door locked" works without the remote unlock', async (t) => {
+  const w = await world(t);
+  const ack = await w.fake.sceneAction('keep_door_locked', { door: w.deviceId(DOORS.GARAGE) });
+  assert.deepEqual(ack, { success: true, data: { outputs: { door_name: 'Garage' } } });
+  assert.deepEqual(sent(w, 'PUT', '/lock_rule')[0].body, { type: 'keep_lock' });
+  assert.equal(w.state(DOORS.GARAGE, 'lock_rule'), 'Always locked');
+});
+
+test('ending "always locked" needs the remote unlock; ending "always unlocked" does not', async (t) => {
+  const w = await world(t);
+  await w.fake.sceneAction('keep_door_locked', { door: w.deviceId(DOORS.GARAGE) });
+  const refused = await w.fake.sceneAction('end_lock_rule', { door: w.deviceId(DOORS.GARAGE) });
+  assert.equal(refused.success, false);
+  assert.match(refused.error, /Ending "always locked" may unlock the door/);
+  assert.equal(sent(w, 'PUT', '/lock_rule').length, 1, 'only the keep_lock');
+
+  // Set to "always unlocked" in UniFi Access: returning to normal locks it.
+  w.controller.lockRules.set(DOORS.FRONT, { type: 'keep_unlock', ended_time: 0 });
+  await w.hub.refreshAndPublish();
+  const done = await w.fake.sceneAction('end_lock_rule', { door: w.deviceId(DOORS.FRONT) });
+  assert.equal(done.success, true);
+  assert.deepEqual(sent(w, 'PUT', '/lock_rule').at(-1).body, { type: 'reset' });
+
+  const allowed = await world(t, unlockOn);
+  await allowed.fake.sceneAction('keep_door_locked', { door: allowed.deviceId(DOORS.GARAGE) });
+  const ended = await allowed.fake.sceneAction('end_lock_rule', {
+    door: allowed.deviceId(DOORS.GARAGE),
+  });
+  assert.equal(ended.success, true);
+});
+
+test('an unknown door or a console down: a readable refusal', async (t) => {
+  const w = await world(t);
+  const unknown = await w.fake.sceneAction('keep_door_locked', { door: 'ext:other:door:x' });
+  assert.match(unknown.error, /Unknown door/);
+  w.controller.online = false;
+  const down = await w.fake.sceneAction('keep_door_locked', { door: w.deviceId(DOORS.GARAGE) });
+  assert.equal(down.success, false);
+  assert.match(down.error, /does not answer/);
+  assert.equal(w.fake.connectionStatus.connected, false);
+});
+
+test('"Test the connection" reports the doors, the socket and the unlock switch', async (t) => {
+  const w = await world(t);
+  const ack = await w.fake.action('test_connection', {});
+  assert.equal(ack.success, true);
+  assert.equal(
+    ack.data.message.en,
+    'Connected: 3 door(s), 5 device(s).\nReal-time notifications: connected.\nRemote unlock: disabled.',
   );
-});
-
-test('identify_device signals the chosen device and returns the declared outputs', async () => {
-  const gladys = createFakeGladys();
-  const outputs = await SCENE_ACTIONS.identify_device(gladys, {
-    fields: { device: deviceIdOf(gladys, 'light') },
-    config,
-  });
-  assert.deepEqual(outputs, { signalled: true });
-  const declared = keysOf(declarationOf('scene_actions', 'identify_device').outputs);
-  for (const key of Object.keys(outputs)) {
-    assert.ok(declared.includes(key), `output "${key}" is not declared, the core would drop it`);
-  }
-});
-
-test('identify_device reports a device that cannot signal itself through its output', async () => {
-  // Not a failure: a scene action is never a condition, the scene author
-  // gates the following actions on the output instead.
-  const gladys = createFakeGladys();
-  const outputs = await SCENE_ACTIONS.identify_device(gladys, {
-    fields: { device: deviceIdOf(gladys, 'weather-station') },
-    config,
-  });
-  assert.deepEqual(outputs, { signalled: false });
+  assert.match(ack.data.message.fr, /^Connecté : 3 porte\(s\)/);
+  const empty = await world(t, { config: {} });
+  const missing = await empty.fake.action('test_connection', {});
+  assert.match(missing.data.message.en, /address of your UniFi console/);
 });

@@ -1,67 +1,162 @@
-# Template de démonstration
+# UniFi Access
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+Amène dans Gladys les portes de **UniFi Access** (le contrôle d'accès d'Ubiquiti : lecteurs G2 et
+G3, Intercom, UA Hub, UA Hub Door Mini, UA Ultra), sur votre réseau local : l'état de chaque verrou
+et de chaque porte, la sonnette, qui est entré et comment, les alarmes de porte. Sans lien avec
+Ubiquiti.
 
-## Ce que vous obtenez
+**Développée sans le matériel : vos retours sont les bienvenus.** L'intégration a été écrite
+d'après l'API officielle, l'intégration Home Assistant et des captures réelles publiées par
+d'autres projets, mais n'a jamais tourné sur une vraie installation UniFi Access. Dites-nous ce
+qui marche et ce qui ne marche pas sur
+[GitHub](https://github.com/guim31/gladys-unifi-access/issues).
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+## Présentation
+
+- Un appareil Gladys par porte UniFi Access, en lecture seule : rien sur le tableau de bord ne
+  peut ouvrir une porte.
+- Temps réel : l'intégration garde une connexion ouverte vers le WebSocket de notifications
+  d'UniFi Access, et relit tout toutes les 5 minutes (chaque minute si le WebSocket est coupé).
+- Déclencheurs de scène : sonnette, accès autorisé, accès refusé, alarme de porte, porte hors
+  ligne puis de retour.
+- Actions de scène : garder une porte verrouillée, la remettre sur son planning normal et —
+  seulement si vous l'activez — déverrouiller une porte.
+- Un widget de tableau de bord : les portes et les derniers accès.
+
+## Prérequis
+
+- UniFi Access sur une console UniFi OS (UDM, UCG, UNVR, Cloud Key Gen2+…), assez récent pour
+  proposer l'API développeur (Settings, General, Advanced, API Token).
+- Gladys 5.1 ou plus récent, sur le même réseau que la console (port 12445 joignable).
+- Un jeton d'API : dans UniFi Access, **Settings → General → Advanced → API Token → Create**.
+  Donnez-lui les permissions **Space** (portes) et **Device**, en lecture et écriture si vous
+  voulez les actions de scène. Copiez-le : il n'est affiché qu'une fois.
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+Dans Gladys : **Intégrations → UniFi Access → Configuration**.
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+| Champ                                      | Quoi saisir                                                                                                                         |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Adresse de la console                      | Adresse IP ou nom de la console, ex. `192.168.1.1`. L'API répond sur le port 12445 : ajoutez `:port` seulement s'il diffère.        |
+| Jeton d'API                                | Le jeton créé ci-dessus. Il reste dans Gladys et n'est jamais écrit dans les logs.                                                  |
+| Accepter le certificat auto-signé          | Les consoles UniFi servent un certificat auto-signé sur le port 12445 : à cocher, sauf si vous avez installé un certificat reconnu. |
+| Autoriser le déverrouillage par les scènes | **Désactivé par défaut.** Lisez « Actions de scène » ci-dessous avant de l'activer.                                                 |
+| Langue des noms de fonctionnalités         | Noms des fonctionnalités à l'ajout d'une porte, et textes des états et des événements de scène (français par défaut).               |
 
-## Actions
+Puis **Tester la connexion** : elle lit la console tout de suite et indique combien de portes et
+d'appareils elle a trouvés, et si les notifications en temps réel sont connectées. Les portes
+apparaissent ensuite dans l'onglet **Découverte** : ajoutez celles que vous voulez.
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+## Appareils
 
-## Scènes
+Chaque porte d'UniFi Access devient un appareil, nommé comme la porte. Ses fonctionnalités sont
+toutes en lecture seule ; certaines n'existent que si le matériel les a.
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
+| Fonctionnalité        | Type Gladys         | Valeurs                                                                                                               |
+| --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Verrou                | verrou / état       | verrouillé ou déverrouillé                                                                                            |
+| Position de la porte  | capteur d'ouverture | ouverte ou fermée — seulement sur une porte dont le capteur de position (DPS) est câblé                               |
+| Sonnette              | sonnette / sonnerie | sonne quelques secondes à chaque appel — sur une porte avec lecteur Pro, interphone ou entrée sonnette du hub         |
+| Règle de verrouillage | texte               | Normal, Toujours verrouillée, Toujours déverrouillée, Déverrouillée un moment jusqu'à 18:30, Déverrouillage planifié… |
+| Dernier accès         | texte               | ex. `Alice Martin · Badge NFC · Entrée`, `Refusé · Inconnu · Code PIN`                                                |
 
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+La pastille de l'appareil indique si sa porte est en ligne (son concentrateur répond à UniFi
+Access), et passe à l'orange quand les notifications en temps réel sont coupées.
 
-## Tableau de bord
+Une porte qui sonne pour la première fois alors qu'elle n'avait pas de fonctionnalité sonnette en
+reçoit une : utilisez **Mettre à jour** dans l'onglet Découverte pour l'ajouter à l'appareil.
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+## Widget
+
+**Portes UniFi Access** : une ligne par porte (verrouillée ou non, ouverte ou fermée, alarme,
+hors ligne) et les derniers accès (qui, comment, autorisé ou refusé). Choisissez une porte dans
+les réglages du widget pour n'afficher qu'elle : le widget propose alors deux boutons, qui
+demandent chacun une confirmation :
+
+- **Toujours verrouiller** : la porte reste verrouillée quel que soit son planning (marqué d'un ✓
+  tant que c'est actif) ;
+- **Planning normal** : met fin à la règle temporaire. Quitter « toujours verrouillée » peut
+  déverrouiller la porte : ce bouton n'apparaît alors que si le déverrouillage à distance est
+  activé.
+
+Il n'y a jamais de bouton de déverrouillage.
+
+## Déclencheurs de scène
+
+| Déclencheur               | Quand                                                   | Filtres                     | Variables                                                                                                                 |
+| ------------------------- | ------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Sonnette actionnée        | quelqu'un a sonné à un lecteur ou à un interphone       | porte                       | nom de la porte, appareil sonné                                                                                           |
+| Accès autorisé            | une porte a été ouverte par badge, code, visage, appli… | porte, méthode, utilisateur | nom de la porte, nom de l'utilisateur, méthode (`nfc`, `pin`, `face`…), méthode en toutes lettres, sens (`entry`, `exit`) |
+| Accès refusé              | un badge, un code ou un visage a été refusé             | porte, méthode              | les mêmes                                                                                                                 |
+| Alarme de porte           | porte forcée ou restée ouverte trop longtemps           | porte, alarme               | nom de la porte, alarme (`forced_open`, `held_open`, `other`), alarme en toutes lettres, type envoyé par UniFi Access     |
+| Porte hors ligne          | le concentrateur d'une porte ne répond plus             | porte                       | nom de la porte                                                                                                           |
+| Porte de nouveau en ligne | le concentrateur d'une porte répond de nouveau          | porte                       | nom de la porte, minutes hors ligne                                                                                       |
+
+UniFi Access signale chaque accès deux fois (un « insight » et une ligne de journal, à quelques
+millisecondes d'écart) : l'intégration ne déclenche qu'une fois.
+
+## Actions de scène
+
+| Action                                     | Effet                                                                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Garder une porte verrouillée               | La porte reste verrouillée quel que soit son planning. Toujours permis.                                                                          |
+| Remettre une porte sur son planning normal | Met fin à « toujours verrouillée » ou « toujours déverrouillée ». Quitter « toujours verrouillée » exige le déverrouillage à distance activé.    |
+| Déverrouiller une porte                    | Un déverrouillage à distance ; la porte se reverrouille seule après son délai habituel. Refusé si le déverrouillage à distance n'est pas activé. |
+
+> **Attention — déverrouillage à distance.** Il est désactivé par défaut. Une fois activé, toute
+> scène qui utilise « Déverrouiller une porte » ouvre la porte quand elle s'exécute : un mauvais
+> déclencheur, un tableau de bord partagé, un compte Gladys compromis signifient alors une porte
+> ouverte. Il n'existe jamais comme interrupteur, commande vocale ou bouton du tableau de bord.
+> Chaque déverrouillage est signé « Gladys » dans le journal système d'UniFi Access.
+
+## Exemples de scènes
+
+- **Quelqu'un à la porte** : déclencheur « Sonnette actionnée » sur la porte d'entrée → envoyer
+  le message « On sonne à {{triggerEvent.data.door_name}} » et afficher la caméra de l'entrée.
+- **Les enfants sont rentrés** : déclencheur « Accès autorisé » avec l'utilisateur « Léa » →
+  envoyer « Léa est rentrée ({{triggerEvent.data.method_label}}) ».
+- **Départ de la maison** : quand l'alarme est armée → « Garder une porte verrouillée » sur
+  chaque porte.
+- **Effraction** : déclencheur « Alarme de porte » avec l'alarme « Porte forcée » → sirène et
+  notification.
+- **Badge refusé** : déclencheur « Accès refusé » → notification avec
+  {{triggerEvent.data.door_name}} et {{triggerEvent.data.method_label}}.
+
+## Rafraîchissement et limites de l'API
+
+- Temps réel par le WebSocket de notifications d'UniFi Access (une connexion sortante du
+  conteneur vers le port 12445), rouverte après 1 s, 2 s, 4 s… jusqu'à 1 minute quand elle tombe.
+- Une lecture complète (portes, appareils, une règle de verrouillage par porte) toutes les
+  5 minutes, chaque minute tant que le WebSocket est coupé ; un état inchangé est renvoyé à
+  Gladys toutes les 6 heures.
+- L'API locale ne publie pas de quota ; l'intégration reste très en dessous de ce qu'une console
+  refuserait (quelques requêtes par minute au plus). Si la console répond « trop de requêtes »,
+  l'intégration le signale et réessaie simplement à la lecture suivante.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+| Message                                                | Que faire                                                                                                                  |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| La console ne répond pas                               | Vérifiez l'adresse, et que Gladys atteint le port 12445 de la console (pare-feu, VLAN).                                    |
+| Certificat non reconnu                                 | Cochez « Accepter le certificat auto-signé ».                                                                              |
+| Jeton d'API refusé                                     | Le jeton a été supprimé ou mal copié : créez-en un nouveau dans UniFi Access et collez-le de nouveau.                      |
+| Il manque une permission au jeton d'API                | Modifiez le jeton dans UniFi Access : donnez-lui les permissions Space et Device.                                          |
+| Cette version d'UniFi Access n'a pas l'API développeur | Mettez UniFi Access à jour.                                                                                                |
+| Notifications en temps réel indisponibles              | Les portes sont tout de même relues chaque minute ; vérifiez que rien entre Gladys et la console ne bloque les WebSockets. |
+
+Pour plus de détails, réglez `LOG_LEVEL=debug` sur l'intégration : chaque notification et chaque
+lecture apparaissent dans les logs (jamais le jeton).
+
+## Limites
+
+- Développée sans le matériel : le vocabulaire des alarmes (seul `force_unlock` a été vu dans
+  des captures), des méthodes d'accès et de certains interphones peut différer sur votre
+  installation. Les valeurs brutes sont gardées dans les variables des déclencheurs.
+- Pas de gestion des visiteurs, des utilisateurs, des codes PIN ni des badges NFC ; pas de
+  commande d'évacuation ni de confinement.
+- Les réponses à la sonnette (décrocher, ouvrir depuis l'interphone) restent dans les applis
+  UniFi.
+- L'historique du widget commence au démarrage de l'intégration (les 20 derniers accès sont
+  gardés).
+- Sans lien avec Ubiquiti. UniFi et UniFi Access sont des marques d'Ubiquiti Inc.

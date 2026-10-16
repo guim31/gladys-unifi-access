@@ -1,177 +1,1078 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "UniFi Access",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "UniFi Access doors: lock, door sensor, doorbell, granted or denied accesses and door alarms.",
+    "fr": "Portes UniFi Access : verrou, capteur d'ouverture, sonnette, accès autorisés ou refusés, alarmes.",
+    "de": "UniFi-Access-Türen: Schloss, Türsensor, Klingel, erlaubte oder verweigerte Zutritte, Alarme.",
+    "es": "Puertas UniFi Access: cerradura, sensor, timbre, accesos permitidos o denegados y alarmas."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-unifi-access:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-unifi-access/main/cover.png",
+  "categories": ["security"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
-      "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+      "label": {
+        "en": "Your UniFi console",
+        "fr": "Votre console UniFi",
+        "de": "Deine UniFi-Konsole",
+        "es": "Su consola UniFi"
       },
-      "links": [
+      "description": {
+        "en": "UniFi Access on a UniFi OS console (UDM, UCG, UNVR, Cloud Key…). In UniFi Access, create an API token: Settings, General, Advanced, API Token, with the Space and Device permissions.",
+        "fr": "UniFi Access sur une console UniFi OS (UDM, UCG, UNVR, Cloud Key…). Dans UniFi Access, créez un jeton d'API : Settings, General, Advanced, API Token, avec les permissions Space et Device.",
+        "de": "UniFi Access auf einer UniFi-OS-Konsole (UDM, UCG, UNVR, Cloud Key…). Erstelle in UniFi Access ein API-Token: Settings, General, Advanced, API Token, mit den Rechten Space und Device.",
+        "es": "UniFi Access en una consola UniFi OS (UDM, UCG, UNVR, Cloud Key…). En UniFi Access, cree un token de API: Settings, General, Advanced, API Token, con los permisos Space y Device."
+      }
+    },
+    {
+      "key": "host",
+      "type": "string",
+      "label": {
+        "en": "Console address",
+        "fr": "Adresse de la console",
+        "de": "Adresse der Konsole",
+        "es": "Dirección de la consola"
+      },
+      "description": {
+        "en": "IP address or name of the console. The API answers on port 12445: add :port only if yours differs.",
+        "fr": "Adresse IP ou nom de la console. L'API répond sur le port 12445 : ajoutez :port seulement s'il diffère.",
+        "de": "IP-Adresse oder Name der Konsole. Die API antwortet auf Port 12445: Gib :Port nur an, wenn er abweicht.",
+        "es": "Dirección IP o nombre de la consola. La API responde en el puerto 12445: añada :puerto solo si es otro."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.1",
+        "fr": "ex. 192.168.1.1",
+        "de": "z. B. 192.168.1.1",
+        "es": "p. ej. 192.168.1.1"
+      },
+      "required": true,
+      "default": ""
+    },
+    {
+      "key": "api_token",
+      "type": "secret",
+      "label": {
+        "en": "API token",
+        "fr": "Jeton d'API",
+        "de": "API-Token",
+        "es": "Token de API"
+      },
+      "description": {
+        "en": "Created in UniFi Access, shown once. Kept in Gladys, never written in the logs.",
+        "fr": "Créé dans UniFi Access, affiché une seule fois. Gardé dans Gladys, jamais écrit dans les logs.",
+        "de": "In UniFi Access erstellt, nur einmal angezeigt. In Gladys gespeichert, nie in den Protokollen.",
+        "es": "Creado en UniFi Access, se muestra una sola vez. Guardado en Gladys, nunca en los registros."
+      },
+      "required": true
+    },
+    {
+      "key": "allow_self_signed",
+      "type": "boolean",
+      "label": {
+        "en": "Accept the self-signed certificate",
+        "fr": "Accepter le certificat auto-signé",
+        "de": "Selbstsigniertes Zertifikat akzeptieren",
+        "es": "Aceptar el certificado autofirmado"
+      },
+      "description": {
+        "en": "UniFi consoles serve a self-signed certificate on port 12445: tick it unless you installed a trusted one.",
+        "fr": "Les consoles UniFi servent un certificat auto-signé sur le port 12445 : à cocher, sauf si vous en avez installé un reconnu.",
+        "de": "UniFi-Konsolen liefern auf Port 12445 ein selbstsigniertes Zertifikat: Aktiviere das, außer du hast ein vertrauenswürdiges installiert.",
+        "es": "Las consolas UniFi sirven un certificado autofirmado en el puerto 12445: márquelo salvo que haya instalado uno reconocido."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "safety",
+      "type": "section",
+      "label": {
+        "en": "Remote unlock",
+        "fr": "Déverrouillage à distance",
+        "de": "Fernentriegelung",
+        "es": "Desbloqueo remoto"
+      },
+      "description": {
+        "en": "Off by default. Enabled, it allows the scene action \"Unlock a door\" and ending \"always locked\" — never a switch nor a dashboard button. A scene that misfires then opens your door: enable it knowingly.",
+        "fr": "Désactivé par défaut. Activé, il permet l'action de scène « Déverrouiller une porte » et la sortie de « toujours verrouillée » — jamais un interrupteur ni un bouton. Une scène qui se trompe ouvre alors votre porte : activez-le en connaissance de cause.",
+        "de": "Standardmäßig aus. Aktiviert erlaubt sie die Szenen-Aktion „Eine Tür entriegeln“ und das Beenden von „immer verriegelt“ — nie als Schalter oder Taste. Eine fehlerhafte Szene öffnet dann deine Tür: Aktiviere sie bewusst.",
+        "es": "Desactivado por defecto. Activado, permite la acción de escena «Desbloquear una puerta» y salir de «siempre bloqueada», nunca un interruptor ni un botón. Una escena errónea abre entonces su puerta: actívelo con conocimiento de causa."
+      }
+    },
+    {
+      "key": "allow_remote_unlock",
+      "type": "boolean",
+      "label": {
+        "en": "Allow remote unlock from scenes",
+        "fr": "Autoriser le déverrouillage par les scènes",
+        "de": "Fernentriegelung durch Szenen erlauben",
+        "es": "Permitir el desbloqueo desde escenas"
+      },
+      "description": {
+        "en": "Each unlock is signed \"Gladys\" in the UniFi Access system log.",
+        "fr": "Chaque déverrouillage est signé « Gladys » dans le journal système d'UniFi Access.",
+        "de": "Jede Entriegelung erscheint als „Gladys“ im Systemprotokoll von UniFi Access.",
+        "es": "Cada desbloqueo aparece firmado «Gladys» en el registro del sistema de UniFi Access."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the feature names",
+        "fr": "Langue des noms de fonctionnalités",
+        "de": "Sprache der Funktionsnamen",
+        "es": "Idioma de los nombres de funciones"
+      },
+      "description": {
+        "en": "Names given to the features when a door is added, and texts of the states and scene events.",
+        "fr": "Noms donnés aux fonctionnalités à l'ajout d'une porte, et textes des états et des événements de scène.",
+        "de": "Namen der Funktionen beim Hinzufügen einer Tür und Texte der Zustände und Szenen-Ereignisse.",
+        "es": "Nombres de las funciones al añadir una puerta y textos de los estados y eventos de escena."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
         }
       ]
-    },
-    {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
-      "required": false,
-      "default": "celsius",
-      "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
-    },
-    {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
-      "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
-      },
-      "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Reads the console now and reports the doors, devices and notifications.",
+        "fr": "Lit la console maintenant et indique les portes, appareils et notifications.",
+        "de": "Liest die Konsole sofort und meldet Türen, Geräte und Benachrichtigungen.",
+        "es": "Lee la consola ahora e indica las puertas, los dispositivos y las notificaciones."
+      },
       "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "doorbell_rang",
+      "label": {
+        "en": "Doorbell rang",
+        "fr": "Sonnette actionnée",
+        "de": "Türklingel betätigt",
+        "es": "Timbre pulsado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "Someone rang at a UniFi Access reader or intercom.",
+        "fr": "Quelqu'un a sonné à un lecteur ou un interphone UniFi Access.",
+        "de": "Jemand hat an einem UniFi-Access-Leser oder einer Gegensprechanlage geklingelt.",
+        "es": "Alguien ha llamado a un lector o un interfono UniFi Access."
       },
       "fields": [
         {
-          "key": "device",
+          "key": "door",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Door (empty: any)",
+            "fr": "Porte (vide : n'importe laquelle)",
+            "de": "Tür (leer: beliebig)",
+            "es": "Puerta (vacío: cualquiera)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
         },
         {
-          "key": "target",
+          "key": "device_name",
+          "type": "string",
+          "label": {
+            "en": "Doorbell device",
+            "fr": "Appareil sonné",
+            "de": "Klingelgerät",
+            "es": "Dispositivo del timbre"
+          }
+        },
+        {
+          "key": "door",
+          "type": "string",
+          "label": {
+            "en": "Door device",
+            "fr": "Appareil de la porte",
+            "de": "Gerät der Tür",
+            "es": "Dispositivo de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "access_granted",
+      "label": {
+        "en": "Access granted",
+        "fr": "Accès autorisé",
+        "de": "Zutritt erlaubt",
+        "es": "Acceso permitido"
+      },
+      "description": {
+        "en": "A door was opened with a badge, a code, a face, the app… with who and how.",
+        "fr": "Une porte a été ouverte par badge, code, visage, appli… avec qui et comment.",
+        "de": "Eine Tür wurde per Karte, Code, Gesicht, App… geöffnet, mit wer und wie.",
+        "es": "Se ha abierto una puerta con tarjeta, código, rostro, app… con quién y cómo."
+      },
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door (empty: any)",
+            "fr": "Porte (vide : n'importe laquelle)",
+            "de": "Tür (leer: beliebig)",
+            "es": "Puerta (vacío: cualquiera)"
+          }
+        },
+        {
+          "key": "method",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Method (empty: any)",
+            "fr": "Méthode (vide : toutes)",
+            "de": "Methode (leer: beliebig)",
+            "es": "Método (vacío: cualquiera)"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "nfc",
+              "label": {
+                "en": "NFC card",
+                "fr": "Badge NFC",
+                "de": "NFC-Karte",
+                "es": "Tarjeta NFC"
+              }
+            },
+            {
+              "value": "pin",
+              "label": {
+                "en": "PIN code",
+                "fr": "Code PIN",
+                "de": "PIN-Code",
+                "es": "Código PIN"
+              }
+            },
+            {
+              "value": "face",
+              "label": {
+                "en": "Face",
+                "fr": "Visage",
+                "de": "Gesicht",
+                "es": "Rostro"
+              }
+            },
+            {
+              "value": "hand_wave",
+              "label": {
+                "en": "Hand wave",
+                "fr": "Geste de la main",
+                "de": "Handbewegung",
+                "es": "Gesto de la mano"
+              }
+            },
+            {
+              "value": "mobile",
+              "label": {
+                "en": "Mobile app",
+                "fr": "Appli mobile",
+                "de": "Mobile App",
+                "es": "App móvil"
+              }
+            },
+            {
+              "value": "wallet",
+              "label": {
+                "en": "Phone wallet",
+                "fr": "Portefeuille du téléphone",
+                "de": "Wallet im Handy",
+                "es": "Cartera del móvil"
+              }
+            },
+            {
+              "value": "qr",
+              "label": {
+                "en": "QR code",
+                "fr": "QR code",
+                "de": "QR-Code",
+                "es": "Código QR"
+              }
+            },
+            {
+              "value": "plate",
+              "label": {
+                "en": "License plate",
+                "fr": "Plaque d'immatriculation",
+                "de": "Nummernschild",
+                "es": "Matrícula"
+              }
+            },
+            {
+              "value": "intercom",
+              "label": {
+                "en": "Intercom",
+                "fr": "Interphone",
+                "de": "Gegensprechanlage",
+                "es": "Interfono"
+              }
+            },
+            {
+              "value": "remote",
+              "label": {
+                "en": "Remote",
+                "fr": "À distance",
+                "de": "Aus der Ferne",
+                "es": "A distancia"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other",
+                "fr": "Autre",
+                "de": "Andere",
+                "es": "Otro"
+              }
+            }
+          ]
+        },
+        {
+          "key": "user",
+          "type": "string",
+          "label": {
+            "en": "User (empty: anyone)",
+            "fr": "Utilisateur (vide : n'importe qui)",
+            "de": "Person (leer: beliebig)",
+            "es": "Usuario (vacío: cualquiera)"
+          },
+          "description": {
+            "en": "Exact name, as shown in UniFi Access.",
+            "fr": "Nom exact, tel que dans UniFi Access.",
+            "de": "Genauer Name, wie in UniFi Access.",
+            "es": "Nombre exacto, como en UniFi Access."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        },
+        {
+          "key": "user",
+          "type": "string",
+          "label": {
+            "en": "User name",
+            "fr": "Nom de l'utilisateur",
+            "de": "Name der Person",
+            "es": "Nombre del usuario"
+          }
+        },
+        {
+          "key": "method",
+          "type": "string",
+          "label": {
+            "en": "Method (nfc, pin, face…)",
+            "fr": "Méthode (nfc, pin, face…)",
+            "de": "Methode (nfc, pin, face…)",
+            "es": "Método (nfc, pin, face…)"
+          }
+        },
+        {
+          "key": "method_label",
+          "type": "string",
+          "label": {
+            "en": "Method, in words",
+            "fr": "Méthode, en toutes lettres",
+            "de": "Methode, ausgeschrieben",
+            "es": "Método, en palabras"
+          }
+        },
+        {
+          "key": "direction",
+          "type": "string",
+          "label": {
+            "en": "Direction (entry, exit)",
+            "fr": "Sens (entry, exit)",
+            "de": "Richtung (entry, exit)",
+            "es": "Sentido (entry, exit)"
+          }
+        },
+        {
+          "key": "door",
+          "type": "string",
+          "label": {
+            "en": "Door device",
+            "fr": "Appareil de la porte",
+            "de": "Gerät der Tür",
+            "es": "Dispositivo de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "access_denied",
+      "label": {
+        "en": "Access denied",
+        "fr": "Accès refusé",
+        "de": "Zutritt verweigert",
+        "es": "Acceso denegado"
+      },
+      "description": {
+        "en": "A badge, a code or a face was refused at a door.",
+        "fr": "Un badge, un code ou un visage a été refusé à une porte.",
+        "de": "Eine Karte, ein Code oder ein Gesicht wurde an einer Tür abgelehnt.",
+        "es": "Se ha rechazado una tarjeta, un código o un rostro en una puerta."
+      },
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door (empty: any)",
+            "fr": "Porte (vide : n'importe laquelle)",
+            "de": "Tür (leer: beliebig)",
+            "es": "Puerta (vacío: cualquiera)"
+          }
+        },
+        {
+          "key": "method",
+          "type": "multi_select",
+          "label": {
+            "en": "Method (empty: any)",
+            "fr": "Méthode (vide : toutes)",
+            "de": "Methode (leer: beliebig)",
+            "es": "Método (vacío: cualquiera)"
+          },
+          "options": [
+            {
+              "value": "nfc",
+              "label": {
+                "en": "NFC card",
+                "fr": "Badge NFC",
+                "de": "NFC-Karte",
+                "es": "Tarjeta NFC"
+              }
+            },
+            {
+              "value": "pin",
+              "label": {
+                "en": "PIN code",
+                "fr": "Code PIN",
+                "de": "PIN-Code",
+                "es": "Código PIN"
+              }
+            },
+            {
+              "value": "face",
+              "label": {
+                "en": "Face",
+                "fr": "Visage",
+                "de": "Gesicht",
+                "es": "Rostro"
+              }
+            },
+            {
+              "value": "hand_wave",
+              "label": {
+                "en": "Hand wave",
+                "fr": "Geste de la main",
+                "de": "Handbewegung",
+                "es": "Gesto de la mano"
+              }
+            },
+            {
+              "value": "mobile",
+              "label": {
+                "en": "Mobile app",
+                "fr": "Appli mobile",
+                "de": "Mobile App",
+                "es": "App móvil"
+              }
+            },
+            {
+              "value": "wallet",
+              "label": {
+                "en": "Phone wallet",
+                "fr": "Portefeuille du téléphone",
+                "de": "Wallet im Handy",
+                "es": "Cartera del móvil"
+              }
+            },
+            {
+              "value": "qr",
+              "label": {
+                "en": "QR code",
+                "fr": "QR code",
+                "de": "QR-Code",
+                "es": "Código QR"
+              }
+            },
+            {
+              "value": "plate",
+              "label": {
+                "en": "License plate",
+                "fr": "Plaque d'immatriculation",
+                "de": "Nummernschild",
+                "es": "Matrícula"
+              }
+            },
+            {
+              "value": "intercom",
+              "label": {
+                "en": "Intercom",
+                "fr": "Interphone",
+                "de": "Gegensprechanlage",
+                "es": "Interfono"
+              }
+            },
+            {
+              "value": "remote",
+              "label": {
+                "en": "Remote",
+                "fr": "À distance",
+                "de": "Aus der Ferne",
+                "es": "A distancia"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other",
+                "fr": "Autre",
+                "de": "Andere",
+                "es": "Otro"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "door_name",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        },
+        {
+          "key": "user",
+          "type": "string",
+          "label": {
+            "en": "User name",
+            "fr": "Nom de l'utilisateur",
+            "de": "Name der Person",
+            "es": "Nombre del usuario"
+          }
+        },
+        {
+          "key": "method",
+          "type": "string",
+          "label": {
+            "en": "Method (nfc, pin, face…)",
+            "fr": "Méthode (nfc, pin, face…)",
+            "de": "Methode (nfc, pin, face…)",
+            "es": "Método (nfc, pin, face…)"
+          }
+        },
+        {
+          "key": "method_label",
+          "type": "string",
+          "label": {
+            "en": "Method, in words",
+            "fr": "Méthode, en toutes lettres",
+            "de": "Methode, ausgeschrieben",
+            "es": "Método, en palabras"
+          }
+        },
+        {
+          "key": "direction",
+          "type": "string",
+          "label": {
+            "en": "Direction (entry, exit)",
+            "fr": "Sens (entry, exit)",
+            "de": "Richtung (entry, exit)",
+            "es": "Sentido (entry, exit)"
+          }
+        },
+        {
+          "key": "door",
+          "type": "string",
+          "label": {
+            "en": "Door device",
+            "fr": "Appareil de la porte",
+            "de": "Gerät der Tür",
+            "es": "Dispositivo de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "door_alarm",
+      "label": {
+        "en": "Door alarm",
+        "fr": "Alarme de porte",
+        "de": "Türalarm",
+        "es": "Alarma de puerta"
+      },
+      "description": {
+        "en": "UniFi Access raised an alarm: door forced open or held open too long.",
+        "fr": "UniFi Access a levé une alarme : porte forcée ou restée ouverte trop longtemps.",
+        "de": "UniFi Access hat Alarm ausgelöst: Tür aufgebrochen oder zu lange offen.",
+        "es": "UniFi Access ha lanzado una alarma: puerta forzada o abierta demasiado tiempo."
+      },
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door (empty: any)",
+            "fr": "Porte (vide : n'importe laquelle)",
+            "de": "Tür (leer: beliebig)",
+            "es": "Puerta (vacío: cualquiera)"
+          }
+        },
+        {
+          "key": "alarm",
+          "type": "multi_select",
+          "label": {
+            "en": "Alarm (empty: any)",
+            "fr": "Alarme (vide : toutes)",
+            "de": "Alarm (leer: beliebig)",
+            "es": "Alarma (vacío: cualquiera)"
+          },
+          "options": [
+            {
+              "value": "forced_open",
+              "label": {
+                "en": "Door forced open",
+                "fr": "Porte forcée",
+                "de": "Tür aufgebrochen",
+                "es": "Puerta forzada"
+              }
+            },
+            {
+              "value": "held_open",
+              "label": {
+                "en": "Door held open",
+                "fr": "Porte restée ouverte",
+                "de": "Tür zu lange offen",
+                "es": "Puerta abierta demasiado tiempo"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other alarm",
+                "fr": "Autre alarme",
+                "de": "Anderer Alarm",
+                "es": "Otra alarma"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        },
+        {
+          "key": "alarm",
+          "type": "string",
+          "label": {
+            "en": "Alarm (forced_open, held_open, other)",
+            "fr": "Alarme (forced_open, held_open, other)",
+            "de": "Alarm (forced_open, held_open, other)",
+            "es": "Alarma (forced_open, held_open, other)"
+          }
+        },
+        {
+          "key": "alarm_label",
+          "type": "string",
+          "label": {
+            "en": "Alarm, in words",
+            "fr": "Alarme, en toutes lettres",
+            "de": "Alarm, ausgeschrieben",
+            "es": "Alarma, en palabras"
+          }
+        },
+        {
+          "key": "alarm_type",
+          "type": "string",
+          "label": {
+            "en": "Alarm type sent by UniFi Access",
+            "fr": "Type d'alarme envoyé par UniFi Access",
+            "de": "Von UniFi Access gesendeter Alarmtyp",
+            "es": "Tipo de alarma enviado por UniFi Access"
+          }
+        },
+        {
+          "key": "door",
+          "type": "string",
+          "label": {
+            "en": "Door device",
+            "fr": "Appareil de la porte",
+            "de": "Gerät der Tür",
+            "es": "Dispositivo de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "door_offline",
+      "label": {
+        "en": "Door offline",
+        "fr": "Porte hors ligne",
+        "de": "Tür offline",
+        "es": "Puerta sin conexión"
+      },
+      "description": {
+        "en": "The hub of a door stopped answering UniFi Access.",
+        "fr": "Le concentrateur d'une porte ne répond plus à UniFi Access.",
+        "de": "Der Hub einer Tür antwortet UniFi Access nicht mehr.",
+        "es": "El concentrador de una puerta ya no responde a UniFi Access."
+      },
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door (empty: any)",
+            "fr": "Porte (vide : n'importe laquelle)",
+            "de": "Tür (leer: beliebig)",
+            "es": "Puerta (vacío: cualquiera)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        },
+        {
+          "key": "door",
+          "type": "string",
+          "label": {
+            "en": "Door device",
+            "fr": "Appareil de la porte",
+            "de": "Gerät der Tür",
+            "es": "Dispositivo de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "door_online",
+      "label": {
+        "en": "Door back online",
+        "fr": "Porte de nouveau en ligne",
+        "de": "Tür wieder online",
+        "es": "Puerta conectada de nuevo"
+      },
+      "description": {
+        "en": "The hub of a door answers UniFi Access again, with how long it was gone.",
+        "fr": "Le concentrateur d'une porte répond de nouveau, avec la durée de la coupure.",
+        "de": "Der Hub einer Tür antwortet wieder, mit der Dauer des Ausfalls.",
+        "es": "El concentrador de una puerta responde de nuevo, con la duración del corte."
+      },
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door (empty: any)",
+            "fr": "Porte (vide : n'importe laquelle)",
+            "de": "Tür (leer: beliebig)",
+            "es": "Puerta (vacío: cualquiera)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        },
+        {
+          "key": "down_minutes",
+          "type": "number",
+          "label": {
+            "en": "Minutes offline",
+            "fr": "Minutes hors ligne",
+            "de": "Minuten offline",
+            "es": "Minutos sin conexión"
+          }
+        },
+        {
+          "key": "door",
+          "type": "string",
+          "label": {
+            "en": "Door device",
+            "fr": "Appareil de la porte",
+            "de": "Gerät der Tür",
+            "es": "Dispositivo de la puerta"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "keep_door_locked",
+      "label": {
+        "en": "Keep a door locked",
+        "fr": "Garder une porte verrouillée",
+        "de": "Eine Tür verriegelt halten",
+        "es": "Mantener una puerta bloqueada"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "The door stays locked whatever its schedule, until it returns to its normal schedule.",
+        "fr": "La porte reste verrouillée quel que soit son planning, jusqu'au retour au planning normal.",
+        "de": "Die Tür bleibt unabhängig von ihrem Plan verriegelt, bis zur Rückkehr zum normalen Plan.",
+        "es": "La puerta permanece bloqueada sea cual sea su horario, hasta volver al horario normal."
+      },
+      "timeout_seconds": 20,
       "fields": [
         {
-          "key": "device",
+          "key": "door",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
+          "label": {
+            "en": "Door",
+            "fr": "Porte",
+            "de": "Tür",
+            "es": "Puerta"
+          },
           "required": true
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "end_lock_rule",
+      "label": {
+        "en": "Return a door to its normal schedule",
+        "fr": "Remettre une porte sur son planning normal",
+        "de": "Tür zum normalen Plan zurückbringen",
+        "es": "Devolver una puerta a su horario normal"
+      },
+      "description": {
+        "en": "Ends \"always locked\" or \"always unlocked\". Ending \"always locked\" requires the remote unlock to be enabled.",
+        "fr": "Met fin à « toujours verrouillée » ou « toujours déverrouillée ». Quitter « toujours verrouillée » exige le déverrouillage à distance activé.",
+        "de": "Beendet „immer verriegelt“ oder „immer entriegelt“. „Immer verriegelt“ zu beenden erfordert die aktivierte Fernentriegelung.",
+        "es": "Termina «siempre bloqueada» o «siempre desbloqueada». Salir de «siempre bloqueada» requiere el desbloqueo remoto activado."
+      },
+      "timeout_seconds": 20,
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door",
+            "fr": "Porte",
+            "de": "Tür",
+            "es": "Puerta"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
+        }
+      ]
+    },
+    {
+      "key": "unlock_door",
+      "label": {
+        "en": "Unlock a door",
+        "fr": "Déverrouiller une porte",
+        "de": "Eine Tür entriegeln",
+        "es": "Desbloquear una puerta"
+      },
+      "description": {
+        "en": "One remote unlock, then the door relocks by itself. Refused unless the remote unlock is enabled in the configuration.",
+        "fr": "Un déverrouillage à distance, puis la porte se reverrouille seule. Refusé si le déverrouillage à distance n'est pas activé.",
+        "de": "Eine Fernentriegelung, danach verriegelt die Tür von selbst. Abgelehnt, solange die Fernentriegelung nicht aktiviert ist.",
+        "es": "Un desbloqueo remoto y la puerta se vuelve a bloquear sola. Rechazado si el desbloqueo remoto no está activado."
+      },
+      "timeout_seconds": 20,
+      "fields": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door",
+            "fr": "Porte",
+            "de": "Tür",
+            "es": "Puerta"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "door_name",
+          "type": "string",
+          "label": {
+            "en": "Door name",
+            "fr": "Nom de la porte",
+            "de": "Name der Tür",
+            "es": "Nombre de la puerta"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "doors",
+      "label": {
+        "en": "UniFi Access doors",
+        "fr": "Portes UniFi Access",
+        "de": "UniFi-Access-Türen",
+        "es": "Puertas UniFi Access"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Lock and position of the doors, alarms and the last accesses.",
+        "fr": "Verrou et position des portes, alarmes et derniers accès.",
+        "de": "Schloss und Position der Türen, Alarme und letzte Zutritte.",
+        "es": "Cerradura y posición de las puertas, alarmas y últimos accesos."
+      },
+      "icon": "lock",
+      "action_timeout_seconds": 20,
+      "settings": [
+        {
+          "key": "door",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Door (empty: all)",
+            "fr": "Porte (vide : toutes)",
+            "de": "Tür (leer: alle)",
+            "es": "Puerta (vacío: todas)"
+          },
+          "description": {
+            "en": "With one door, the widget offers \"Always locked\" and \"Normal schedule\".",
+            "fr": "Avec une seule porte, le widget propose « Toujours verrouiller » et « Planning normal ».",
+            "de": "Mit einer Tür bietet das Widget „Immer verriegeln“ und „Normaler Plan“.",
+            "es": "Con una sola puerta, el widget ofrece «Siempre bloquear» y «Horario normal»."
+          },
+          "required": false
+        }
+      ]
     }
   ]
 }

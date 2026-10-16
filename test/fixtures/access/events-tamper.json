@@ -1,0 +1,25 @@
+[
+  {
+    "event": "access.tamper_resistant",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000060",
+    "save_to_history": true,
+    "data": {
+      "device": {
+        "unique_id": "aabbcc000000",
+        "name": "UA Ultra back",
+        "device_type": "UA-ULTRA",
+        "mac": "AABBCC000000",
+        "guid": "00000000-0000-0000-0000-000000000003",
+        "firmware": "v1.7.4.0",
+        "is_connected": true
+      },
+      "door_id": "00000000-0000-0000-0000-000000000002",
+      "door_name": "Back door",
+      "host_device_mac": "AABBCC000011",
+      "notify_user_ids": ["00000000-0000-0000-0000-00000000000b"],
+      "request_id": "00000000-0000-0000-0000-000000000061",
+      "title": "Tamper alert"
+    }
+  }
+]
