@@ -236,6 +236,7 @@ export class AccessHub {
     this.ruleTimers.clear();
     this.pulseTimers.clear();
     clearTimeout(this.topologyTimer);
+    this.topologyTimer = null;
   }
 
   async stop() {

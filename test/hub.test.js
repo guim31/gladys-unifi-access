@@ -228,6 +228,28 @@ test('a door added in UniFi Access appears after its first notification', async 
   assert.ok(await until(() => w.fake.discoveredDevices.some((device) => device.name === 'Shed')));
 });
 
+test('a door added after a configuration change still appears', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const w = await world(t);
+  // A notification arms the topology read; the configuration changes before it runs.
+  w.hub.scheduleTopology();
+  w.controller.token = `${CONFIG.api_token}x`;
+  await w.fake.configUpdated({ ...CONFIG, api_token: `${CONFIG.api_token}x` });
+  await settle();
+  w.controller.doors.push({
+    door_lock_relay_status: 'lock',
+    door_position_status: 'none',
+    id: '00000000-0000-0000-0000-0000000000bb',
+    name: 'Cellar',
+    type: 'door',
+  });
+  w.controller.lockRules.set('00000000-0000-0000-0000-0000000000bb', { type: '', ended_time: 0 });
+  await w.notify({ event: 'access.data.v2.device.delete', data: { id: 'aabbcc000003' } });
+  t.mock.timers.tick(3_000);
+  await settle();
+  assert.ok(w.fake.discoveredDevices.some((device) => device.name === 'Cellar'));
+});
+
 test('adding a door in Gladys publishes its states again', async (t) => {
   const w = await world(t);
   const before = w.fake.states.length;
