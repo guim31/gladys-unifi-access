@@ -1,61 +1,148 @@
-# Demo Devices Template
+# UniFi Access
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+Brings the doors of **UniFi Access** (Ubiquiti's access control: G2 and G3 readers, Intercom, UA
+Hub, UA Hub Door Mini, UA Ultra) into Gladys, on your local network: the state of each lock and
+door, the doorbell, who came in and how, the door alarms. Not affiliated with Ubiquiti.
 
-## What you get
+**Developed without the hardware: feedback welcome.** The integration was written from the
+official API, the Home Assistant integration and real captures published by other projects, but
+never run against a real UniFi Access installation. Tell us what works and what does not on
+[GitHub](https://github.com/guim31/gladys-unifi-access/issues).
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+## Presentation
+
+- One Gladys device per UniFi Access door, read-only: nothing on the dashboard can open a door.
+- Real time: the integration keeps a connection open to the notification WebSocket of UniFi
+  Access, and reads everything again every 5 minutes (every minute if the WebSocket is down).
+- Scene triggers: doorbell, access granted, access denied, door alarm, door offline and back.
+- Scene actions: keep a door locked, return it to its normal schedule, and — only if you enable it
+  — unlock a door.
+- A dashboard widget: the doors and the last accesses.
+
+## Prerequisites
+
+- UniFi Access running on a UniFi OS console (UDM, UCG, UNVR, Cloud Key Gen2+…), recent enough to
+  offer the developer API (Settings, General, Advanced, API Token).
+- Gladys 5.1 or later, on the same network as the console (port 12445 reachable).
+- An API token: in UniFi Access, **Settings → General → Advanced → API Token → Create**. Give it
+  the **Space** (doors) and **Device** permissions, in read and write if you want the scene
+  actions. Copy it: it is shown once.
 
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+In Gladys: **Integrations → UniFi Access → Configuration**.
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+| Field                              | What to enter                                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Console address                    | IP address or name of the console, e.g. `192.168.1.1`. The API answers on port 12445: add `:port` only if yours differs.     |
+| API token                          | The token created above. It stays in Gladys and is never written in the logs.                                                |
+| Accept the self-signed certificate | UniFi consoles serve a self-signed certificate on port 12445: tick it unless you installed a certificate your system trusts. |
+| Allow remote unlock from scenes    | **Off by default.** See "Scene actions" below before enabling it.                                                            |
+| Language of the feature names      | Names of the features when a door is added, and texts of the states and scene events (French by default).                    |
 
-## Actions
+Then **Test the connection**: it reads the console now and says how many doors and devices it
+found, and whether the real-time notifications are connected. The doors then appear in the
+**Discovery** tab: add the ones you want.
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+## Devices
 
-## Scenes
+Each door of UniFi Access becomes one device, named like the door. Its features are all
+read-only; some only exist if the hardware has them.
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+| Feature       | Gladys type     | Values                                                                                                  |
+| ------------- | --------------- | ------------------------------------------------------------------------------------------------------- |
+| Lock          | lock / state    | locked or unlocked                                                                                      |
+| Door position | opening sensor  | open or closed — only on a door whose position sensor (DPS) is wired                                    |
+| Doorbell      | doorbell / ring | rings for a few seconds at each ring — on a door with a reader Pro, an intercom or a hub doorbell input |
+| Lock rule     | text            | Normal, Always locked, Always unlocked, Unlocked for a while until 18:30, Unlock schedule…              |
+| Last access   | text            | e.g. `Alice Martin · NFC card · Entry`, `Denied · Unknown · PIN code`                                   |
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+The badge of the device says whether its door is online (its hub answers UniFi Access), and turns
+orange when the real-time notifications are down.
 
-## Dashboard
+A door that rings for the first time while it had no doorbell feature gets one: use **Update** in
+the Discovery tab to add it to the device.
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+## Widget
+
+**UniFi Access doors**: one line per door (locked or unlocked, open or closed, alarm, offline) and
+the last accesses (who, how, granted or denied). Choose a door in the widget settings to show only
+that one: the widget then offers two buttons, each asking for confirmation:
+
+- **Always locked**: the door stays locked whatever its schedule (shown with a ✓ while active);
+- **Normal schedule**: ends the temporary rule. Ending "always locked" can unlock the door, so this
+  button only appears for it when the remote unlock is enabled.
+
+There is never an unlock button.
+
+## Scene triggers
+
+| Trigger          | When                                                     | Filters                 | Variables                                                                                          |
+| ---------------- | -------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Doorbell rang    | someone rang at a reader or an intercom                  | door                    | door name, doorbell device                                                                         |
+| Access granted   | a door was opened with a badge, a code, a face, the app… | door, method, user name | door name, user name, method (`nfc`, `pin`, `face`…), method in words, direction (`entry`, `exit`) |
+| Access denied    | a badge, a code or a face was refused                    | door, method            | same                                                                                               |
+| Door alarm       | door forced open or held open too long                   | door, alarm             | door name, alarm (`forced_open`, `held_open`, `other`), alarm in words, type sent by UniFi Access  |
+| Door offline     | the hub of a door stopped answering                      | door                    | door name                                                                                          |
+| Door back online | the hub of a door answers again                          | door                    | door name, minutes offline                                                                         |
+
+UniFi Access reports each access twice (an "insight" and a log line, a few milliseconds apart):
+the integration fires the trigger once.
+
+## Scene actions
+
+| Action                               | Effect                                                                                                            |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Keep a door locked                   | The door stays locked whatever its schedule. Always allowed.                                                      |
+| Return a door to its normal schedule | Ends "always locked" or "always unlocked". Ending "always locked" requires the remote unlock to be enabled.       |
+| Unlock a door                        | One remote unlock; the door relocks by itself after its usual delay. Refused unless the remote unlock is enabled. |
+
+> **Warning — remote unlock.** It is off by default. Once enabled, any scene using "Unlock a
+> door" opens the door when it runs: a wrong trigger, a shared dashboard, a compromised Gladys
+> account then means an open door. It never exists as a switch, a voice command or a dashboard
+> button. Each unlock is signed "Gladys" in the UniFi Access system log.
+
+## Scene examples
+
+- **Someone at the door**: trigger "Doorbell rang" on the front door → send a message "Someone is
+  ringing at {{triggerEvent.data.door_name}}", and show the camera of the entrance.
+- **The children are home**: trigger "Access granted" with user "Léa" → send "Léa came home
+  ({{triggerEvent.data.method_label}})".
+- **Leaving the house**: when the alarm system is armed → "Keep a door locked" on every door.
+- **Break-in**: trigger "Door alarm" with alarm "Door forced open" → siren and notification.
+- **A badge refused three times**: trigger "Access denied" → notification with
+  {{triggerEvent.data.door_name}} and {{triggerEvent.data.method_label}}.
+
+## Refresh and limits of the API
+
+- Real time through the notification WebSocket of UniFi Access (one outgoing connection from
+  the container to port 12445), reopened after 1 s, 2 s, 4 s… up to 1 minute when it drops.
+- A complete read (doors, devices, one lock rule per door) every 5 minutes, every minute while
+  the WebSocket is down; an unchanged state is sent again to Gladys every 6 hours.
+- The local API publishes no quota; the integration stays far below anything a console would
+  refuse (a few requests per minute at most). If the console answers "too many requests", the
+  integration says so and simply tries again at the next read.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+| Message                                           | What to do                                                                                                  |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| The console does not answer                       | Check the address, and that Gladys reaches port 12445 of the console (firewall, VLAN).                      |
+| Certificate not trusted                           | Tick "Accept the self-signed certificate".                                                                  |
+| API token refused                                 | The token was deleted or mistyped: create a new one in UniFi Access and paste it again.                     |
+| The API token lacks a permission                  | Edit the token in UniFi Access: give it the Space and Device permissions.                                   |
+| This UniFi Access version lacks the developer API | Update UniFi Access.                                                                                        |
+| Real-time notifications unavailable               | The doors are still read every minute; check that nothing between Gladys and the console blocks WebSockets. |
+
+For more details, set `LOG_LEVEL=debug` on the integration: every notification and every read
+appears in the logs (never the token).
+
+## Limitations
+
+- Developed without the hardware: the vocabulary of the alarms (only `force_unlock` has been seen
+  in captures), of the access methods and of some intercoms may differ on your installation.
+  The raw values are kept in the trigger variables.
+- No visitor, user, PIN or NFC card management; no evacuation or lockdown control.
+- The doorbell answers (pick up, open from the intercom) stay in the UniFi apps.
+- The history of the widget starts when the integration starts (the 20 last accesses are kept).
+- Not affiliated with Ubiquiti. UniFi and UniFi Access are trademarks of Ubiquiti Inc.

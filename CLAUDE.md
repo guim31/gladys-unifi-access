@@ -9,7 +9,9 @@ A Gladys Assistant **external integration**: a Node.js service (Node 22+, ESM,
 no build step) that runs in its own sandboxed Docker container and talks to
 Gladys through
 [`@gladysassistant/integration-sdk`](https://github.com/GladysAssistant/integration-sdk-js),
-its only runtime dependency. It started from the official JavaScript template.
+and `ws` (the notification WebSocket: the WebSocket built into Node can send
+neither an `Authorization` header nor accept a self-signed certificate). It
+started from the official JavaScript template.
 
 ## Commands
 
@@ -31,15 +33,25 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+index.js                          SDK wiring only (src/app.js), graceful shutdown
+src/app.js                        registers every handler before connect(), returns the hub
+src/hub.js                        AccessHub: doors state, notifications, own refresh timer,
+                                  scene events, commands (keep locked, end rule, unlock)
+src/access/client.js              developer API client (REST, envelope and error kinds)
+src/access/socket.js              notification WebSocket: reconnection, ping
+src/access/transport.js           network seam: node:https + ws (replaced by a fake in tests)
+src/access/model.js               pure parsers of the REST answers and notifications
+src/devices.js                    one Gladys device per door: features, names, states
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/widgets.js                    the `doors` widget (manifest `widgets`)
+src/texts.js                      every text sent to Gladys, in en/fr/de/es
+src/store.js                      /data/unifi-access-state.json (access history, doorbells)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
+scripts/probe.mjs                 read-only probe of a real console (fake token, then real one)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (same sections)
+test/helpers/fakeAccess.js        in-memory UniFi Access controller (REST + WebSocket)
+test/fixtures/access/             real captures (hjdhjd/unifi-access, ISC), see its README
 test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
@@ -70,8 +82,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German and Spanish: action
+  messages, manifest texts, feature names, widget texts, and `docs/en.md`,
+  `docs/fr.md`, `docs/de.md`, `docs/es.md`, kept in sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +246,50 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## UniFi Access (propre à cette intégration)
+
+**API.** API développeur officielle, sur la console : `https://<console>:12445/api/v1/developer`,
+jeton d'API (UniFi Access → Settings → General → Advanced → API Token, permissions Space et
+Device) en `Authorization: Bearer`, sur le REST comme sur le WebSocket
+`/devices/notifications`. Certificat auto-signé sur 12445 : case « Accepter le certificat
+auto-signé », désactivée par défaut (consigne de la série), le statut de connexion dit de la cocher.
+
+**Pièges découverts (sans matériel, d'après les captures de hjdhjd/unifi-access et HA) :**
+
+- Un refus arrive en **statut HTTP (401/403/404/429) ou en HTTP 200** avec `code` nommant
+  l'erreur (`CODE_AUTH_FAILED`, `CODE_NOT_EXISTS`…) ; certains firmwares mettent un `code`
+  numérique et le nom dans `codeS`. `readEnvelope` lit les deux.
+- **Chaque accès arrive deux fois** : `access.logs.insights.add` puis, quelques ms plus tard,
+  `access.logs.add` (Home Assistant core #184928). Les deux ont `id`/`_id` vides : dédupliquer sur
+  (porte, résultat, `published`).
+- Dans un accès, `metadata.door.id` est souvent **l'id du hub, pas celui de la porte** : résoudre
+  d'abord par le nom de la porte, puis par la table appareil → porte (`GET /devices`,
+  `device_ids` des `v2.location.update`).
+- Résultat d'un accès : `ACCESS` = autorisé ; refusé = `BLOCKED` (pas `DENIED`).
+  `credential_provider` en minuscules dans insights (`wave`, `nfc`, `remote_through_uah`), en
+  majuscules dans logs.
+- `alarms: [{ type: "force_unlock" }]` dans l'état d'une porte tant que l'alarme dure ; **le
+  membre disparaît** quand elle cesse (rapport complet sans `alarms` = plus d'alarme). Seul
+  `force_unlock` a été vu ; les autres types passent en `other` avec le type brut en variable.
+- `access.data.location.update` (ancien dialecte) double chaque `v2.location.update` : ne pas
+  relire tout le site à chaque fois, seulement sur un renommage.
+- `door_position_status: none` / `dps_connected: false` : pas de capteur câblé. La
+  fonctionnalité « Position de la porte » n'est créée que si le capteur existe ; ne jamais publier
+  « fermée » par défaut.
+- Un firmware sans règles de verrouillage répond 404 à `lock_rule` : la fonctionnalité n'est pas
+  créée, et la règle n'est plus demandée.
+- Sonnette : `access.remote_view` (interphone/lecteur Pro, `door_id` absent sur les firmwares de
+  2024 → résolution par l'appareil) et `access.hw.door_bell` peuvent signaler la même sonnerie :
+  dédupliquer par porte sur 20 s.
+
+**Sécurité (consigne de la série).** Le déverrouillage à distance est désactivé par défaut
+(`allow_remote_unlock`), n'existe que comme action de scène, jamais comme interrupteur ni bouton.
+Sortir de « toujours verrouillée » (`reset` d'un `keep_lock`) peut déverrouiller : même
+interrupteur. « Toujours verrouillée » (`keep_lock`) est toujours permis. Toutes les
+fonctionnalités sont en lecture seule (`lock/state`, jamais `lock/binary`, que le front rend comme
+un interrupteur). `test/scenes.test.js` et `test/widgets.test.js` le figent.
+
+**Vérifier sur une vraie console :** `node scripts/probe.mjs <console>` (faux jeton jusqu'au
+refus), puis `UNIFI_ACCESS_TOKEN=… node scripts/probe.mjs <console> 60` (lecture seule, liste
+les évènements reçus et les méthodes d'accès vues).

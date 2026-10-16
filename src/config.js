@@ -50,7 +50,8 @@ export function parseHost(raw) {
   // The console web interface (443) does not serve the developer API: a URL
   // copied from the browser without a port means the API port.
   const port = url.port ? Number(url.port) : DEFAULT_PORT;
-  return { hostname: url.hostname, port };
+  // An IPv6 address comes bracketed from URL: Node wants it bare.
+  return { hostname: url.hostname.replace(/^\[(.*)\]$/, '$1'), port };
 }
 
 /** `host:port` as shown to the user and in the logs (never a token). */

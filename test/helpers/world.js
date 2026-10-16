@@ -45,6 +45,14 @@ export async function settle() {
   }
 }
 
+/** Wait (real timers) until `condition()` holds, 2 s at most. */
+export async function until(condition) {
+  for (let i = 0; i < 200 && !condition(); i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  return condition();
+}
+
 /**
  * @param {object} [options]
  * @param {FakeAccess} [options.controller]
