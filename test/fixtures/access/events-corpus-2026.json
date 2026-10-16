@@ -1,0 +1,374 @@
+[
+  {
+    "event": "access.base.info",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000033",
+    "save_to_history": false,
+    "data": {
+      "top_log_count": 0
+    }
+  },
+  {
+    "event": "access.data.v2.location.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000036",
+    "save_to_history": false,
+    "data": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "location_type": "door",
+      "name": "Front door",
+      "up_id": "00000000-0000-0000-0000-000000000001",
+      "extras": null,
+      "device_ids": ["aabbcc000001", "aabbcc000002", "aabbcc000003"],
+      "thumbnail": {
+        "type": "thumbnail",
+        "url": "REDACTED-0000001f-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "door_thumbnail_last_update": 1786606388
+      }
+    },
+    "meta": {
+      "object_type": "location",
+      "target_field": ["thumbnail"],
+      "all_field": false,
+      "id": "00000000-0000-0000-0000-000000000006",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.location.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000037",
+    "save_to_history": false,
+    "data": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "location_type": "door",
+      "name": "Front door",
+      "up_id": "00000000-0000-0000-0000-000000000001",
+      "extras": null,
+      "device_ids": ["aabbcc000001", "aabbcc000002", "aabbcc000003"],
+      "guard": [
+        {
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "name": "Bob Durand",
+          "alias": "",
+          "first_name": "Bob",
+          "last_name": "Durand",
+          "avatar": ""
+        },
+        {
+          "id": "00000000-0000-0000-0000-00000000000c",
+          "name": "Carol Petit",
+          "alias": "",
+          "first_name": "Carol",
+          "last_name": "Petit",
+          "avatar": ""
+        }
+      ],
+      "state": {
+        "lock": "locked",
+        "dps": "none",
+        "dps_connected": false,
+        "unlock_suspend": {
+          "status": "end",
+          "unlock_type": ""
+        },
+        "emergency": {
+          "software": "none",
+          "hardware": "none"
+        },
+        "is_unavailable": false
+      },
+      "thumbnail": {
+        "type": "thumbnail",
+        "url": "REDACTED-0000001f-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "door_thumbnail_last_update": 1786606388
+      },
+      "last_activity": 1782959614
+    },
+    "meta": {
+      "object_type": "location",
+      "target_field": null,
+      "all_field": true,
+      "id": "00000000-0000-0000-0000-000000000006",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000038",
+    "save_to_history": false,
+    "data": {
+      "name": "Reader front outside",
+      "alias": "Test alias 75",
+      "id": "aabbcc000002",
+      "ip": "192.0.2.3",
+      "mac": "aa:bb:cc:00:00:02",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-G2-PRO",
+      "connected_hub_id": "aabbcc000001",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v1.14.17.0",
+      "version": "v3.14.4552",
+      "guid": "00000000-0000-0000-0000-000000000009",
+      "start_time": 1784045238,
+      "hw_type": "GA",
+      "revision": "1786095367040183648",
+      "access_method": {
+        "nfc": "yes",
+        "bt_button": "yes",
+        "bt_tap": "yes",
+        "face": "yes",
+        "pin_code": "REDACTED-00000008-",
+        "qr_code": "yes"
+      },
+      "cap": null,
+      "direction": "entry",
+      "settings": [
+        {
+          "key": "brightness",
+          "tag": "device_setting",
+          "value": "36"
+        },
+        {
+          "key": "volume",
+          "tag": "device_setting",
+          "value": "36"
+        },
+        {
+          "key": "capture_tof_enable",
+          "tag": "device_setting",
+          "value": "yes"
+        },
+        {
+          "key": "door_bell_trigger_type",
+          "tag": "device_setting",
+          "value": "on"
+        },
+        {
+          "key": "door_bell_trigger_interface",
+          "tag": "device_setting",
+          "value": "swipe"
+        },
+        {
+          "key": "show_auth_method",
+          "tag": "device_setting",
+          "value": "yes"
+        },
+        {
+          "key": "capture_record_extra_before",
+          "tag": "device_setting",
+          "value": "5"
+        },
+        {
+          "key": "tof_distance",
+          "tag": "device_setting",
+          "value": "2000"
+        }
+      ],
+      "category": ["ua-pro"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["access_method", "settings", "direction"],
+      "all_field": false,
+      "id": "aabbcc000002",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.location.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000039",
+    "save_to_history": false,
+    "data": {
+      "id": "00000000-0000-0000-0000-000000000006",
+      "location_type": "door",
+      "name": "Front door",
+      "up_id": "00000000-0000-0000-0000-000000000001",
+      "extras": null,
+      "device_ids": ["aabbcc000001", "aabbcc000002", "aabbcc000003"],
+      "guard": [
+        {
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "name": "Bob Durand",
+          "alias": "",
+          "first_name": "Bob",
+          "last_name": "Durand",
+          "avatar": ""
+        },
+        {
+          "id": "00000000-0000-0000-0000-00000000000c",
+          "name": "Carol Petit",
+          "alias": "",
+          "first_name": "Carol",
+          "last_name": "Petit",
+          "avatar": ""
+        }
+      ],
+      "state": {
+        "lock": "locked",
+        "dps": "none",
+        "dps_connected": false,
+        "unlock_suspend": {
+          "status": "end",
+          "unlock_type": ""
+        },
+        "emergency": {
+          "software": "none",
+          "hardware": "none"
+        },
+        "is_unavailable": false
+      },
+      "thumbnail": {
+        "type": "thumbnail",
+        "url": "REDACTED-0000001f-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "door_thumbnail_last_update": 1786606388
+      },
+      "last_activity": 1782959614
+    },
+    "meta": {
+      "object_type": "location",
+      "target_field": null,
+      "all_field": true,
+      "id": "00000000-0000-0000-0000-000000000006",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000040",
+    "save_to_history": false,
+    "data": {
+      "name": "Reader front inside",
+      "alias": "Test alias 77",
+      "id": "aabbcc000003",
+      "ip": "192.0.2.4",
+      "mac": "aa:bb:cc:00:00:03",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-G2-MINI",
+      "connected_hub_id": "aabbcc000001",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v3.18.21.0",
+      "version": "v3.18.21.0",
+      "guid": "00000000-0000-0000-0000-00000000000d",
+      "start_time": 1783874602,
+      "hw_type": "GA",
+      "revision": "1786095367040183648",
+      "cap": null,
+      "direction": "exit",
+      "category": ["ua-lite"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["online"],
+      "all_field": false,
+      "id": "aabbcc000003",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000041",
+    "save_to_history": false,
+    "data": {
+      "name": "Reader front inside",
+      "alias": "Test alias 77",
+      "id": "aabbcc000003",
+      "ip": "192.0.2.4",
+      "mac": "aa:bb:cc:00:00:03",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-G2-MINI",
+      "connected_hub_id": "aabbcc000001",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v3.18.21.0",
+      "version": "v3.18.21.0",
+      "guid": "00000000-0000-0000-0000-00000000000d",
+      "start_time": 1783874602,
+      "hw_type": "GA",
+      "revision": "1786095367040183648",
+      "cap": null,
+      "direction": "exit",
+      "category": ["ua-lite"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["online"],
+      "all_field": false,
+      "id": "aabbcc000003",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000042",
+    "save_to_history": false,
+    "data": {
+      "name": "UA Hub Front",
+      "alias": "Hub front door",
+      "id": "aabbcc000001",
+      "ip": "192.0.2.2",
+      "mac": "aa:bb:cc:00:00:01",
+      "online": true,
+      "adopting": false,
+      "device_type": "UAH",
+      "connected_hub_id": "",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v4.12.19.0",
+      "version": "v4.12.195",
+      "guid": "00000000-0000-0000-0000-000000000007",
+      "start_time": 1780317315,
+      "hw_type": "",
+      "revision": "1786095367040183648",
+      "cap": null,
+      "category": ["hub"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["online"],
+      "all_field": false,
+      "id": "aabbcc000001",
+      "source": ""
+    }
+  },
+  {
+    "event": "access.data.v2.device.update",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-000000000043",
+    "save_to_history": false,
+    "data": {
+      "name": "Reader front outside",
+      "alias": "Test alias 75",
+      "id": "aabbcc000002",
+      "ip": "192.0.2.3",
+      "mac": "aa:bb:cc:00:00:02",
+      "online": true,
+      "adopting": false,
+      "device_type": "UA-G2-PRO",
+      "connected_hub_id": "aabbcc000001",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "firmware": "v1.14.17.0",
+      "version": "v3.14.4552",
+      "guid": "00000000-0000-0000-0000-000000000009",
+      "start_time": 1784045238,
+      "hw_type": "GA",
+      "revision": "1786095367040183648",
+      "cap": null,
+      "direction": "entry",
+      "category": ["ua-pro"]
+    },
+    "meta": {
+      "object_type": "device",
+      "target_field": ["online"],
+      "all_field": false,
+      "id": "aabbcc000002",
+      "source": ""
+    }
+  }
+]

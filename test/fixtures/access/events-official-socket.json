@@ -1,0 +1,25 @@
+[
+  {
+    "event": "access.remote_view.change",
+    "receiver_id": "",
+    "event_object_id": "00000000-0000-0000-0000-00000000005f",
+    "save_to_history": false,
+    "data": {
+      "device_id": "aabbcc000001",
+      "access_device_id": "aabbcc000002",
+      "user_id": "00000000-0000-0000-0000-00000000000b",
+      "user_type": "user",
+      "user_status": "",
+      "location_id": "00000000-0000-0000-0000-000000000006",
+      "authentication_type": "CALL",
+      "out": false,
+      "reason_code": 0,
+      "success": true,
+      "capture_resource_id": "",
+      "faces_capture_id": "",
+      "timestamp": 1786828198,
+      "source": "bell",
+      "viewer_id": ""
+    }
+  }
+]
