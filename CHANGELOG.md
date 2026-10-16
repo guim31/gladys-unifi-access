@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-16
+
 ### Added
 
 - UniFi Access doors in Gladys, through the official UniFi Access API of the
@@ -36,4 +38,5 @@ the notes of the version's GitHub Release.
 - `scripts/probe.mjs`, a read-only probe of a real console.
 - Apache-2.0 `LICENSE` file.
 
-[Unreleased]: https://github.com/guim31/gladys-unifi-access/commits/main
+[Unreleased]: https://github.com/guim31/gladys-unifi-access/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-unifi-access/releases/tag/v1.0.1

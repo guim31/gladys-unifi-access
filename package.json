@@ -1,6 +1,6 @@
 {
   "name": "gladys-unifi-access",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "UniFi Access doors in Gladys Assistant: locks, door sensors, doorbells, accesses and alarms.",
   "type": "module",
